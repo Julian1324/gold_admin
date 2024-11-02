@@ -1,6 +1,5 @@
 const API_URL = process.env.REACT_APP_API_URL;
-const USER_SIGNUP = '/user/signup';
-const USER_SIGNIN = '/user/signin';
+const USER_SIGNIN = '/user/signinAdm';
 const USER_INFO = '/user';
 const USER_SETPASSWORD = '/userPassword';
 const USER_CREATED = '¡Usuario creado con éxito! Bienvenido a nuestra comunidad. A continuación puedes ingresar con tu cuenta.';
@@ -40,7 +39,6 @@ const KEY_STORAGE_BASE = 'GLDST0';
 
 export const constants = Object.freeze({
     API_URL,
-    USER_SIGNUP,
     USER_SIGNIN,
     USER_INFO,
     USER_SETPASSWORD,

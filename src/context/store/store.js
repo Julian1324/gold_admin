@@ -28,5 +28,3 @@ const initGoldStore = () => {
 const goldStore = initGoldStore();
 
 export const getUserSlice = goldStore.userSlice;
-export const getCategorySlice = goldStore.categorySlice;
-export const getCartSlice = goldStore.cartSlice;

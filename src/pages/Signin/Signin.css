@@ -2,11 +2,11 @@
     width: 10vw;
 }
 
-/* .myBackground{
+.myBackground{
     background-image: url(../../assets/loginBackground.webp);
     background-size: cover;
     background-position: center;
-} */
+}
 
 .myOpacity{
     opacity: 0.9;

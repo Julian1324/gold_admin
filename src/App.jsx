@@ -3,7 +3,6 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import routes from "./routes/routes";
 import { Suspense } from 'react';
 import MyNavbar from "./shared/Navbar/MyNavbar.jsx";
-import Footer from './shared/Footer/Footer.jsx';
 
 function App() {
   return (
@@ -16,10 +15,10 @@ function App() {
               element={
                 <Suspense fallback={<span>Loading...</span>}>
                   {
-                    route.path.includes('sign') ?
-                      <route.component />
+                    route.path.includes('home') ?
+                      <> <MyNavbar /><route.component /> </>
                       :
-                      <> <MyNavbar /><route.component /><Footer /> </>
+                      <route.component />
                   }
                 </Suspense>
               }

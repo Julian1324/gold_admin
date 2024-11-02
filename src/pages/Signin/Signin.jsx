@@ -48,7 +48,7 @@ const Signin = () => {
             setLoadingLogin(false);
         } else {
             setAlertModalShow(false);
-            navigator('../');
+            navigator('../home');
         }
     }
 
@@ -69,7 +69,7 @@ const Signin = () => {
                                 <div className="card-body">
 
                                     <div className="pt-4 pb-2">
-                                        <h5 className="card-title text-center pb-0 fs-4">Ingresa a tu cuenta</h5>
+                                        <h5 className="card-title text-center pb-0 fs-4">Administrativo</h5>
                                         <p className="text-center small">Ingresa tu email y tu contraseña para ingresar</p>
                                     </div>
 
