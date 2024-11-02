@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import './Signin.css';
 import Spinner from 'react-bootstrap/Spinner';
-import goldServiceLogo from '../../assets/Crop_servicioGold.webp';
+import { assets } from '../../assets/assets.js';
 import { useForm } from 'react-hook-form';
 import { signInUser } from '../../helpers/axiosHelper';
 import { AlertModal } from '../../shared/Modal/AlertModal';
@@ -62,7 +62,7 @@ const Signin = () => {
                             <div className="card mb-3 bg-dark text-white myOpacity">
                                 <div className="d-flex justify-content-center">
                                     <div className="logo d-flex align-items-center justify-content-center w-auto">
-                                        <img src={goldServiceLogo} alt="goldServiceLogo" className='img-fluid imgLogo' />
+                                        <img src={assets['goldServiceLogo']} alt="goldServiceLogo" className='img-fluid imgLogo' />
                                     </div>
                                 </div>
 
