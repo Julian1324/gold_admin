@@ -4,9 +4,10 @@ import { getCategorySlice, getUserSlice } from '../../context/store/store';
 import { useForm } from 'react-hook-form';
 import { AlertModal } from '../../shared/Modal/AlertModal';
 import { constants } from "../../context/constants";
-import { createProduct } from "../../helpers/axiosHelper";
+import { createProduct, getAllProducts } from "../../helpers/axiosHelper";
 import { useNavigate } from 'react-router-dom';
 import Spinner from 'react-bootstrap/Spinner';
+import { Table, Button, Modal, Form } from 'react-bootstrap';
 
 const Services = () => {
     const navigator = useNavigate();
@@ -16,6 +17,9 @@ const Services = () => {
     const [alertModalShow, setAlertModalShow] = useState(false);
     const [messagesToModal, setMessagesToModal] = useState({ title: '', body: '' });
     const [loadingServices, setLoadingServices] = useState(false);
+    const [products, setProducts] = useState([]);
+    const [showModal, setShowModal] = useState(false);
+    const [currentRow, setCurrentRow] = useState(null);
 
     const {
         register,
@@ -27,10 +31,15 @@ const Services = () => {
     useEffect(() => {
         const marginLeft = document.querySelector('.sidebar').clientWidth;
         const marginTop = document.querySelector('.header').clientHeight;
-        if (marginLeft && marginTop) return setMargin({
+        if (marginLeft && marginTop) setMargin({
             marginLeft,
             marginTop
         });
+        const getProducts = async () => {
+            const response = await getAllProducts({ page: 1 });
+            setProducts(response.data.docs);
+        }
+        getProducts();
     }, []);
 
     const onSubmit = async (form) => {
@@ -44,8 +53,12 @@ const Services = () => {
             };
             setLoadingServices(true);
             const response = await createProduct(productDTO, headers);
-            console.log('response', response);
             setLoadingServices(response.loadingReq);
+            const newProduct = {
+                ...response.data,
+                category_id: form.category_id
+            };
+            setProducts([newProduct, ...products]);
             if (Object.keys(response.data).length) {
                 setMessagesToModal({ title: constants.MODAL_TITLE_SUCCCESS, body: constants.PRODUCT_CREATED });
                 setAlertModalShow(response.alertModalShow);
@@ -67,6 +80,22 @@ const Services = () => {
             navigator('../services');
         }
     }
+
+    const getCategoryName = (category_id) => categories.find((category) => category._id === category_id).name;
+
+    const handleEditClick = (row) => {
+        setCurrentRow(row);
+        setShowModal(true);
+    };
+
+    const handleSave = () => {
+
+        const updatedData = products.map((product) =>
+            product._id === currentRow._id ? currentRow : product
+        );
+        setProducts(updatedData);
+        setShowModal(false);
+    };
 
     return (
         <>
@@ -169,6 +198,94 @@ const Services = () => {
                 </form>
 
             </div>
+            <Table
+                bordered
+                hover
+                style={
+                    {
+                        marginLeft: (margin.marginLeft ? margin.marginLeft : 0) + 30,
+                        marginTop: (margin.marginTop ? margin.marginTop : 0) + 30,
+                        width: '75%'
+                    }
+                }
+            >
+                <thead>
+                    <tr>
+                        <th>Categoria</th>
+                        <th>Nombre</th>
+                        <th>Precio</th>
+                        <th>Descuento</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {products.map((product) => (
+                        <tr key={product._id}>
+                            <td>{getCategoryName(product.category_id)}</td>
+                            <td>{product.name}</td>
+                            <td>{product.price}</td>
+                            <td>{product.discount}%</td>
+                            <td>
+                                <Button
+                                    variant="warning"
+                                    onClick={() => handleEditClick(product)}
+                                >
+                                    Editar
+                                </Button>
+                            </td>
+                        </tr>
+                    ))}
+                </tbody>
+            </Table>
+            <Modal show={showModal} onHide={() => setShowModal(false)}>
+                <Modal.Header closeButton>
+                    <Modal.Title>Editar servicio</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    {currentRow && (
+                        <Form>
+                            <Form.Group controlId="formName">
+                                <Form.Label>Nombre</Form.Label>
+                                <Form.Control
+                                    type="text"
+                                    value={currentRow.name}
+                                    onChange={(e) =>
+                                        setCurrentRow({ ...currentRow, name: e.target.value })
+                                    }
+                                />
+                            </Form.Group>
+                            <Form.Group controlId="formAge">
+                                <Form.Label>Precio</Form.Label>
+                                <Form.Control
+                                    type="number"
+                                    value={currentRow.price}
+                                    onChange={(e) =>
+                                        setCurrentRow({ ...currentRow, price: e.target.value })
+                                    }
+                                />
+                            </Form.Group>
+                            <Form.Group controlId="formCity">
+                                <Form.Label>Descuento</Form.Label>
+                                <Form.Control
+                                    type="text"
+                                    value={currentRow.discount}
+                                    onChange={(e) =>
+                                        setCurrentRow({ ...currentRow, discount: e.target.value })
+                                    }
+                                />
+                            </Form.Group>
+                        </Form>
+                    )}
+                </Modal.Body>
+                <Modal.Footer>
+                    <Button variant="secondary" onClick={() => setShowModal(false)}>
+                        Cancelar
+                    </Button>
+                    <Button variant="primary" onClick={handleSave}>
+                        Guardar
+                    </Button>
+                </Modal.Footer>
+            </Modal>
             <AlertModal
                 show={alertModalShow}
                 onHide={() => onCloseModal()}
