@@ -1,115 +1,26 @@
 import './Sidebar.css';
+import { useLocation, NavLink } from 'react-router-dom';
 
 function Sidebar() {
+  const location = useLocation();
+
   return (
     <aside id="sidebar" className="sidebar">
 
       <ul className="sidebar-nav" id="sidebar-nav">
 
         <li className="nav-item">
-          <a className="nav-link " href="./services">
+          <NavLink to={"/services"} className={`nav-link ${(location.pathname === "/services") ? "active" : "collapsed"}`}>
             <i className="bi bi-grid"></i>
             <span>Crear servicio</span>
-          </a>
+          </NavLink>
         </li>
 
         <li className="nav-item">
-          <a className="nav-link " href="./home">
+          <NavLink to={"/home"} className={`nav-link ${(location.pathname === "/home") ? "active" : "collapsed"}`}>
             <i className="bi bi-grid"></i>
             <span>Recargar saldo</span>
-          </a>
-        </li>
-
-        <li className="nav-item">
-          <a className="nav-link collapsed" data-bs-target="#forms-nav" data-bs-toggle="collapse" href="./home">
-            <i className="bi bi-journal-text"></i><span>Forms</span><i className="bi bi-chevron-down ms-auto"></i>
-          </a>
-          <ul id="forms-nav" className="nav-content collapse " data-bs-parent="#sidebar-nav">
-            <li>
-              <a href="./home">
-                <i className="bi bi-circle"></i><span>Form Elements</span>
-              </a>
-            </li>
-            <li>
-              <a href="./home">
-                <i className="bi bi-circle"></i><span>Form Layouts</span>
-              </a>
-            </li>
-            <li>
-              <a href="./home">
-                <i className="bi bi-circle"></i><span>Form Editors</span>
-              </a>
-            </li>
-            <li>
-              <a href="./home">
-                <i className="bi bi-circle"></i><span>Form Validation</span>
-              </a>
-            </li>
-          </ul>
-        </li>
-
-        <li className="nav-item">
-          <a className="nav-link collapsed" data-bs-target="#tables-nav" data-bs-toggle="collapse" href="./home">
-            <i className="bi bi-layout-text-window-reverse"></i><span>Tables</span><i className="bi bi-chevron-down ms-auto"></i>
-          </a>
-          <ul id="tables-nav" className="nav-content collapse " data-bs-parent="#sidebar-nav">
-            <li>
-              <a href="./home">
-                <i className="bi bi-circle"></i><span>General Tables</span>
-              </a>
-            </li>
-            <li>
-              <a href="./home">
-                <i className="bi bi-circle"></i><span>Data Tables</span>
-              </a>
-            </li>
-          </ul>
-        </li>
-
-        <li className="nav-item">
-          <a className="nav-link collapsed" data-bs-target="#charts-nav" data-bs-toggle="collapse" href="./home">
-            <i className="bi bi-bar-chart"></i><span>Charts</span><i className="bi bi-chevron-down ms-auto"></i>
-          </a>
-          <ul id="charts-nav" className="nav-content collapse " data-bs-parent="#sidebar-nav">
-            <li>
-              <a href="./home">
-                <i className="bi bi-circle"></i><span>Chart.js</span>
-              </a>
-            </li>
-            <li>
-              <a href="./home">
-                <i className="bi bi-circle"></i><span>ApexCharts</span>
-              </a>
-            </li>
-            <li>
-              <a href="./home">
-                <i className="bi bi-circle"></i><span>ECharts</span>
-              </a>
-            </li>
-          </ul>
-        </li>
-
-        <li className="nav-item">
-          <a className="nav-link collapsed" data-bs-target="#icons-nav" data-bs-toggle="collapse" href="./home">
-            <i className="bi bi-gem"></i><span>Icons</span><i className="bi bi-chevron-down ms-auto"></i>
-          </a>
-          <ul id="icons-nav" className="nav-content collapse " data-bs-parent="#sidebar-nav">
-            <li>
-              <a href="./home">
-                <i className="bi bi-circle"></i><span>Bootstrap Icons</span>
-              </a>
-            </li>
-            <li>
-              <a href="./home">
-                <i className="bi bi-circle"></i><span>Remix Icons</span>
-              </a>
-            </li>
-            <li>
-              <a href="./home">
-                <i className="bi bi-circle"></i><span>Boxicons</span>
-              </a>
-            </li>
-          </ul>
+          </NavLink>
         </li>
 
         <li className="nav-heading">Pages</li>
