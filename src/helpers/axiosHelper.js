@@ -116,3 +116,20 @@ export const queryProducts = async ({ query }) => {
         throw error;
     }
 }
+
+export const createProduct = async (productDTO, headers) => {
+    try {
+        const response = await axiosInstance.post(
+            `${constants.API_URL + constants.CREATE_PRODUCT}`,
+            productDTO,
+            { headers }
+        );
+        if (response.status === 200) return {
+            data: response.data,
+            loadingReq: false,
+            alertModalShow: true
+        }
+    } catch (error) {
+        throw error;
+    }
+}

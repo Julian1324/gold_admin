@@ -31,3 +31,9 @@
   cursor: pointer;
   color: #012970;
 }
+
+@media only screen and (max-width: 500px) {
+  .header {
+    height: 5rem;
+  }
+}

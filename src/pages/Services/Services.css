@@ -1,0 +1,6 @@
+@media only screen and (max-width: 500px) {
+    .card-body {
+        margin-left: 1rem !important;
+        width: 95% !important;
+    }
+}

@@ -3,9 +3,11 @@ import { persist, createJSONStorage } from 'zustand/middleware';
 import secureLocalStorage from "react-secure-storage";
 import { constants } from '../constants.js';
 import { userSlice } from './userSlice.js';
+import { categorySlice } from './categorySlice.js';
 
 const mySlices = {
-    userSlice
+    userSlice,
+    categorySlice
 };
 
 const initGoldStore = () => {
@@ -28,3 +30,4 @@ const initGoldStore = () => {
 const goldStore = initGoldStore();
 
 export const getUserSlice = goldStore.userSlice;
+export const getCategorySlice = goldStore.categorySlice;

@@ -48,7 +48,7 @@ const Signin = () => {
             setLoadingLogin(false);
         } else {
             setAlertModalShow(false);
-            navigator('../home');
+            navigator('../services');
         }
     }
 
@@ -119,7 +119,7 @@ const Signin = () => {
 
                                         <div className="col-12">
                                             <div className="form-check">
-                                                <input className="form-check-input" type="checkbox" name="remember" value="true" id="rememberMe" />
+                                                <input className="form-check-input" type="checkbox" name="remember" defaultValue="true" id="rememberMe" />
                                                 <label className="form-check-label" htmlFor="rememberMe">Recordarme</label>
                                             </div>
                                         </div>

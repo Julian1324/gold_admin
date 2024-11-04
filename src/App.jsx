@@ -16,7 +16,7 @@ function App() {
               element={
                 <Suspense fallback={<span>Loading...</span>}>
                   {
-                    route.path.includes('home') ?
+                    route.path !== '/' ?
                       <> <MyNavbar /> <Sidebar/> <route.component /> </>
                       :
                       <route.component />

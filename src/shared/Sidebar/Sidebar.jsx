@@ -7,88 +7,17 @@ function Sidebar() {
       <ul className="sidebar-nav" id="sidebar-nav">
 
         <li className="nav-item">
-          <a className="nav-link " href="./home">
+          <a className="nav-link " href="./services">
             <i className="bi bi-grid"></i>
             <span>Crear servicio</span>
           </a>
         </li>
 
         <li className="nav-item">
-          <a className="nav-link collapsed" data-bs-target="#components-nav" data-bs-toggle="collapse" href='./home'>
-            <i className="bi bi-menu-button-wide"></i><span>Components</span><i className="bi bi-chevron-down ms-auto"></i>
+          <a className="nav-link " href="./home">
+            <i className="bi bi-grid"></i>
+            <span>Recargar saldo</span>
           </a>
-          <ul id="components-nav" className="nav-content collapse " data-bs-parent="#sidebar-nav">
-            <li>
-              <a href="./home">
-                <i className="bi bi-circle"></i><span>Alerts</span>
-              </a>
-            </li>
-            <li>
-              <a href="./home">
-                <i className="bi bi-circle"></i><span>Accordion</span>
-              </a>
-            </li>
-            <li>
-              <a href="./home">
-                <i className="bi bi-circle"></i><span>Badges</span>
-              </a>
-            </li>
-            <li>
-              <a href="./home">
-                <i className="bi bi-circle"></i><span>Breadcrumbs</span>
-              </a>
-            </li>
-            <li>
-              <a href="./home">
-                <i className="bi bi-circle"></i><span>Buttons</span>
-              </a>
-            </li>
-            <li>
-              <a href="./home">
-                <i className="bi bi-circle"></i><span>Cards</span>
-              </a>
-            </li>
-            <li>
-              <a href="./home">
-                <i className="bi bi-circle"></i><span>Carousel</span>
-              </a>
-            </li>
-            <li>
-              <a href="./home">
-                <i className="bi bi-circle"></i><span>List group</span>
-              </a>
-            </li>
-            <li>
-              <a href="./home">
-                <i className="bi bi-circle"></i><span>Modal</span>
-              </a>
-            </li>
-            <li>
-              <a href="./home">
-                <i className="bi bi-circle"></i><span>Tabs</span>
-              </a>
-            </li>
-            <li>
-              <a href="./home">
-                <i className="bi bi-circle"></i><span>Pagination</span>
-              </a>
-            </li>
-            <li>
-              <a href="./home">
-                <i className="bi bi-circle"></i><span>Progress</span>
-              </a>
-            </li>
-            <li>
-              <a href="./home">
-                <i className="bi bi-circle"></i><span>Spinners</span>
-              </a>
-            </li>
-            <li>
-              <a href="./home">
-                <i className="bi bi-circle"></i><span>Tooltips</span>
-              </a>
-            </li>
-          </ul>
         </li>
 
         <li className="nav-item">
