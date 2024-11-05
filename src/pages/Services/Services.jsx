@@ -18,8 +18,10 @@ const Services = () => {
     const [messagesToModal, setMessagesToModal] = useState({ title: '', body: '' });
     const [loadingServices, setLoadingServices] = useState(false);
     const [products, setProducts] = useState([]);
-    const [showModal, setShowModal] = useState(false);
+    const [showEditModal, setShowEditModal] = useState(false);
     const [currentRow, setCurrentRow] = useState(null);
+    const [paginator, setPaginator] = useState({});
+    const [loadingPage, setLoadingPage] = useState({});
 
     const {
         register,
@@ -36,8 +38,18 @@ const Services = () => {
             marginTop
         });
         const getProducts = async () => {
-            const response = await getAllProducts({ page: 1 });
-            setProducts(response.data.docs);
+            const { data } = await getAllProducts({ page: 1 });
+            const {
+                docs, hasNextPage, hasPrevPage, limit, nextPage,
+                page, pagingCounter, prevPage, totalDocs, totalPages
+            } = data;
+
+            setProducts(docs);
+
+            setPaginator({
+                hasNextPage, hasPrevPage, limit, nextPage, page,
+                pagingCounter, prevPage, totalDocs, totalPages
+            });
         }
         getProducts();
     }, []);
@@ -85,27 +97,52 @@ const Services = () => {
 
     const handleEditClick = (row) => {
         setCurrentRow(row);
-        setShowModal(true);
+        setShowEditModal(true);
     };
 
     const handleSave = () => {
-
         const updatedData = products.map((product) =>
             product._id === currentRow._id ? currentRow : product
         );
         setProducts(updatedData);
-        setShowModal(false);
+        setShowEditModal(false);
     };
+
+    const handlePages = async (event, pageToQuery) => {
+        event.preventDefault();
+        if (pageToQuery === paginator.page) return;
+        setLoadingPage(prevState => ({
+            ...prevState,
+            [pageToQuery]: true
+        }));
+
+        const { data } = await getAllProducts({ page: pageToQuery });
+        const {
+            docs, hasNextPage, hasPrevPage, limit, nextPage,
+            page, pagingCounter, prevPage, totalDocs, totalPages
+        } = data;
+
+        setProducts(docs);
+
+        setPaginator({
+            hasNextPage, hasPrevPage, limit, nextPage, page,
+            pagingCounter, prevPage, totalDocs, totalPages
+        });
+        setLoadingPage(prevState => ({
+            ...prevState,
+            [pageToQuery]: false
+        }));
+    }
 
     return (
         <>
             <div
-                className="card-body"
+                className="card-body p-4 rounded bg-white"
                 style={
                     {
                         marginLeft: (margin.marginLeft ? margin.marginLeft : 0) + 30,
                         marginTop: (margin.marginTop ? margin.marginTop : 0) + 30,
-                        width: '75%'
+                        width: '75%',
                     }
                 }
             >
@@ -198,46 +235,83 @@ const Services = () => {
                 </form>
 
             </div>
-            <Table
-                bordered
-                hover
+            <div
+                className="mt-3"
                 style={
                     {
                         marginLeft: (margin.marginLeft ? margin.marginLeft : 0) + 30,
-                        marginTop: (margin.marginTop ? margin.marginTop : 0) + 30,
-                        width: '75%'
+                        width: '75%',
+                        boxShadow: '0px 0px 20px rgba(1, 41, 112, 0.1)',
+                        padding: '1rem',
+                        backgroundColor: 'white',
+                        borderRadius: '0.3rem'
                     }
                 }
             >
-                <thead>
-                    <tr>
-                        <th>Categoria</th>
-                        <th>Nombre</th>
-                        <th>Precio</th>
-                        <th>Descuento</th>
-                        <th>Acciones</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {products.map((product) => (
-                        <tr key={product._id}>
-                            <td>{getCategoryName(product.category_id)}</td>
-                            <td>{product.name}</td>
-                            <td>{product.price}</td>
-                            <td>{product.discount}%</td>
-                            <td>
-                                <Button
-                                    variant="warning"
-                                    onClick={() => handleEditClick(product)}
-                                >
-                                    Editar
-                                </Button>
-                            </td>
+                <Table bordered hover>
+                    <thead>
+                        <tr>
+                            <th>Categoria</th>
+                            <th>Nombre</th>
+                            <th>Precio</th>
+                            <th>Descuento</th>
+                            <th>Acciones</th>
                         </tr>
-                    ))}
-                </tbody>
-            </Table>
-            <Modal show={showModal} onHide={() => setShowModal(false)}>
+                    </thead>
+                    <tbody>
+                        {products.map((product) => (
+                            <tr key={product._id}>
+                                <td>{getCategoryName(product.category_id)}</td>
+                                <td>{product.name}</td>
+                                <td>{product.price}</td>
+                                <td>{product.discount}%</td>
+                                <td>
+                                    <Button
+                                        variant="warning"
+                                        onClick={() => handleEditClick(product)}
+                                    >
+                                        Editar
+                                    </Button>
+                                </td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </Table>
+                <div className="d-flex justify-content-center">
+                    <nav aria-label="Page navigation example">
+                        <ul className="pagination">
+                            {paginator.prevPage &&
+                                <li className="page-item" onClick={(event) => handlePages(event, paginator.prevPage)}>
+                                    <a className="page-link" href=".">
+                                        Atrás
+                                    </a>
+                                </li>
+                            }
+                            {Array(paginator.totalPages).fill('').map((_, pageIndex) => {
+                                return (
+                                    <li
+                                        className={paginator.page === (pageIndex + 1) ? "page-item active" : "page-item"}
+                                        key={pageIndex}
+                                        onClick={(event) => handlePages(event, (pageIndex + 1))}
+                                    >
+                                        <a className="page-link" href=".">
+                                            {loadingPage[pageIndex + 1] ? <Spinner animation="border" size="sm" /> : (pageIndex + 1)}
+                                        </a>
+                                    </li>
+                                )
+                            })}
+                            {paginator.hasNextPage &&
+                                <li className="page-item fixedSize" onClick={(event) => handlePages(event, paginator.nextPage)}>
+                                    <a className="page-link" href=".">
+                                        Adelante
+                                    </a>
+                                </li>
+                            }
+                        </ul>
+                    </nav>
+                </div>
+            </div>
+            <Modal centered show={showEditModal} onHide={() => setShowEditModal(false)}>
                 <Modal.Header closeButton>
                     <Modal.Title>Editar servicio</Modal.Title>
                 </Modal.Header>
@@ -254,23 +328,35 @@ const Services = () => {
                                     }
                                 />
                             </Form.Group>
-                            <Form.Group controlId="formAge">
+                            <Form.Group controlId="formPrice">
                                 <Form.Label>Precio</Form.Label>
                                 <Form.Control
                                     type="number"
+                                    step="100"
                                     value={currentRow.price}
                                     onChange={(e) =>
                                         setCurrentRow({ ...currentRow, price: e.target.value })
                                     }
                                 />
                             </Form.Group>
-                            <Form.Group controlId="formCity">
+                            <Form.Group controlId="formDiscount">
                                 <Form.Label>Descuento</Form.Label>
                                 <Form.Control
-                                    type="text"
+                                    type="number"
+                                    step="1"
                                     value={currentRow.discount}
                                     onChange={(e) =>
                                         setCurrentRow({ ...currentRow, discount: e.target.value })
+                                    }
+                                />
+                            </Form.Group>
+                            <Form.Group controlId="formDiscount">
+                                <Form.Label>Descripcion</Form.Label>
+                                <Form.Control
+                                    type="text"
+                                    value={currentRow.description}
+                                    onChange={(e) =>
+                                        setCurrentRow({ ...currentRow, description: e.target.value })
                                     }
                                 />
                             </Form.Group>
@@ -278,7 +364,7 @@ const Services = () => {
                     )}
                 </Modal.Body>
                 <Modal.Footer>
-                    <Button variant="secondary" onClick={() => setShowModal(false)}>
+                    <Button variant="secondary" onClick={() => setShowEditModal(false)}>
                         Cancelar
                     </Button>
                     <Button variant="primary" onClick={handleSave}>
