@@ -45,40 +45,11 @@ export const getCategories = async () => {
     }
 }
 
-export const getProductsByCategory = async ({ category_id, page }) => {
-    try {
-        const response = await axiosInstance.get(
-            `${constants.API_URL + constants.GET_PRODUCTS_BY_CATEGORY}?${constants.PARAMS_CATEGORY_ID + category_id}&${constants.PARAMS_PAGE + page}`,
-        )
-        if (response.status === 200) return {
-            data: response.data,
-            loadingReq: false,
-        }
-    } catch (error) {
-        throw error;
-    }
-}
-
 export const getProduct = async ({ _id }) => {
     try {
         const response = await axiosInstance.get(
             `${constants.API_URL + constants.GET_PRODUCT_BY_ID}?${constants.PARAMS_PRODUCT + _id}`,
         )
-        if (response.status === 200) return {
-            data: response.data,
-            loadingReq: false,
-        }
-    } catch (error) {
-        throw error;
-    }
-}
-
-export const getCartItems = async ({ items }) => {
-    try {
-        const response = await axiosInstance.post(
-            `${constants.API_URL + constants.GET_CART_PRODUCTS}`,
-            { items }
-        );
         if (response.status === 200) return {
             data: response.data,
             loadingReq: false,
@@ -142,6 +113,23 @@ export const getAllProducts = async ({ page }) => {
         if (response.status === 200) return {
             data: response.data,
             loadingReq: false,
+        }
+    } catch (error) {
+        throw error;
+    }
+}
+
+export const updateProduct = async (productDTO, headers) => {
+    try {
+        const response = await axiosInstance.put(
+            `${constants.API_URL + constants.CREATE_PRODUCT}`,
+            productDTO,
+            { headers }
+        );
+        if (response.status === 200) return {
+            data: response.data,
+            loadingReq: false,
+            alertModalShow: true
         }
     } catch (error) {
         throw error;

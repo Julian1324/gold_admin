@@ -4,7 +4,7 @@ import { getCategorySlice, getUserSlice } from '../../context/store/store';
 import { useForm } from 'react-hook-form';
 import { AlertModal } from '../../shared/Modal/AlertModal';
 import { constants } from "../../context/constants";
-import { createProduct, getAllProducts } from "../../helpers/axiosHelper";
+import { createProduct, getAllProducts, updateProduct } from "../../helpers/axiosHelper";
 import { useNavigate } from 'react-router-dom';
 import Spinner from 'react-bootstrap/Spinner';
 import { Table, Button, Modal, Form } from 'react-bootstrap';
@@ -17,6 +17,7 @@ const Services = () => {
     const [alertModalShow, setAlertModalShow] = useState(false);
     const [messagesToModal, setMessagesToModal] = useState({ title: '', body: '' });
     const [loadingServices, setLoadingServices] = useState(false);
+    const [loadingEdition, setLoadingEdition] = useState(false);
     const [products, setProducts] = useState([]);
     const [showEditModal, setShowEditModal] = useState(false);
     const [currentRow, setCurrentRow] = useState(null);
@@ -66,11 +67,14 @@ const Services = () => {
             setLoadingServices(true);
             const response = await createProduct(productDTO, headers);
             setLoadingServices(response.loadingReq);
+
             const newProduct = {
                 ...response.data,
                 category_id: form.category_id
             };
+            
             setProducts([newProduct, ...products]);
+            
             if (Object.keys(response.data).length) {
                 setMessagesToModal({ title: constants.MODAL_TITLE_SUCCCESS, body: constants.PRODUCT_CREATED });
                 setAlertModalShow(response.alertModalShow);
@@ -100,12 +104,19 @@ const Services = () => {
         setShowEditModal(true);
     };
 
-    const handleSave = () => {
+    const handleSave = async () => {
+        setLoadingEdition(true);
+        const response = await updateProduct(currentRow, headers);
         const updatedData = products.map((product) =>
-            product._id === currentRow._id ? currentRow : product
+            product._id === response.data._id ? response.data : product
         );
         setProducts(updatedData);
-        setShowEditModal(false);
+        if (Object.keys(response.data).length) {
+            setMessagesToModal({ title: constants.MODAL_TITLE_SUCCCESS, body: constants.PRODUCT_UPDATED });
+            setAlertModalShow(response.alertModalShow);
+        }
+        setLoadingEdition(response.loadingReq);
+        setShowEditModal(response.loadingReq);
     };
 
     const handlePages = async (event, pageToQuery) => {
@@ -259,8 +270,8 @@ const Services = () => {
                         </tr>
                     </thead>
                     <tbody>
-                        {products.map((product) => (
-                            <tr key={product._id}>
+                        {products.map((product, productIndex) => (
+                            <tr key={productIndex}>
                                 <td>{getCategoryName(product.category_id)}</td>
                                 <td>{product.name}</td>
                                 <td>{product.price}</td>
@@ -369,6 +380,7 @@ const Services = () => {
                     </Button>
                     <Button variant="primary" onClick={handleSave}>
                         Guardar
+                        {loadingEdition && <Spinner animation="border" role="status" size="sm" className='ms-2' />}
                     </Button>
                 </Modal.Footer>
             </Modal>

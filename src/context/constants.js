@@ -8,6 +8,7 @@ const GET_PRODUCTS_BY_CATEGORY = '/productsByCategory';
 const GET_PRODUCT_BY_ID = '/product';
 const CREATE_PRODUCT = '/product';
 const PRODUCT_CREATED = '¡Servicio creado exitosamente!';
+const PRODUCT_UPDATED = '¡Servicio actualizado exitosamente!';
 const GET_ALL_PRODUCTS = '/products';
 const QUERY_PRODUCTS = '/queryProducts';
 const MODAL_TITLE_SUCCCESS = '¡Se ha realizado con éxito!';
@@ -35,6 +36,7 @@ export const constants = Object.freeze({
     GET_PRODUCT_BY_ID,
     CREATE_PRODUCT,
     PRODUCT_CREATED,
+    PRODUCT_UPDATED,
     GET_ALL_PRODUCTS,
     QUERY_PRODUCTS,
     MODAL_TITLE_SUCCCESS,
