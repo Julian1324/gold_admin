@@ -8,6 +8,7 @@ import { createProduct, getAllProducts, updateProduct } from "../../helpers/axio
 import { useNavigate } from 'react-router-dom';
 import Spinner from 'react-bootstrap/Spinner';
 import { Table, Button, Modal, Form } from 'react-bootstrap';
+import ConfirmModal from "../../../../gold_admin/src/shared/Modal/ConfirmModal";
 
 const Services = () => {
     const navigator = useNavigate();
@@ -23,6 +24,8 @@ const Services = () => {
     const [currentRow, setCurrentRow] = useState(null);
     const [paginator, setPaginator] = useState({});
     const [loadingPage, setLoadingPage] = useState({});
+    const [confirmModalShow, setConfirmModalShow] = useState(false);
+    const [productDTO, setProductDTO] = useState({});
 
     const {
         register,
@@ -38,6 +41,7 @@ const Services = () => {
             marginLeft,
             marginTop
         });
+        if (!Object.keys(headers).length) return;
         const getProducts = async () => {
             const { data } = await getAllProducts({ page: 1 });
             const {
@@ -53,38 +57,20 @@ const Services = () => {
             });
         }
         getProducts();
-    }, []);
+    }, [headers]);
 
     const onSubmit = async (form) => {
-        try {
-            const productDTO = {
-                ...form,
-                discount: form.discount ? form.discount : 0,
-                isEntire: !form.isEntire,
-                quantity: 0,
-                status: true
-            };
-            setLoadingServices(true);
-            const response = await createProduct(productDTO, headers);
-            setLoadingServices(response.loadingReq);
+        const productDTO = {
+            ...form,
+            discount: form.discount ? form.discount : 0,
+            isEntire: !form.isEntire,
+            quantity: 0,
+            status: true
+        };
+        setConfirmModalShow(true);
+        setLoadingServices(true);
+        setProductDTO(productDTO);
 
-            const newProduct = {
-                ...response.data,
-                category_id: form.category_id
-            };
-            
-            setProducts([newProduct, ...products]);
-            
-            if (Object.keys(response.data).length) {
-                setMessagesToModal({ title: constants.MODAL_TITLE_SUCCCESS, body: constants.PRODUCT_CREATED });
-                setAlertModalShow(response.alertModalShow);
-            }
-            reset();
-        } catch (error) {
-            console.log('error:', error);
-            setMessagesToModal({ title: constants.MODAL_TITLE_ERROR, body: error?.response?.data });
-            setAlertModalShow(true);
-        }
     }
 
     const onCloseModal = () => {
@@ -105,18 +91,26 @@ const Services = () => {
     };
 
     const handleSave = async () => {
-        setLoadingEdition(true);
-        const response = await updateProduct(currentRow, headers);
-        const updatedData = products.map((product) =>
-            product._id === response.data._id ? response.data : product
-        );
-        setProducts(updatedData);
-        if (Object.keys(response.data).length) {
+        try {
+            setLoadingEdition(true);
+            const response = await updateProduct(currentRow, headers);
+            const updatedData = products.map((product) =>
+                product._id === response.data._id ? response.data : product
+            );
+            setProducts(updatedData);
             setMessagesToModal({ title: constants.MODAL_TITLE_SUCCCESS, body: constants.PRODUCT_UPDATED });
             setAlertModalShow(response.alertModalShow);
+            setLoadingEdition(response.loadingReq);
+            setShowEditModal(response.loadingReq);
+
+        } catch (error) {
+            console.log('error:', error);
+            const myBody = error?.response?.data.includes('jwt') ? constants.USER_SESSION_EXPIRED : error?.response?.data;
+            setMessagesToModal({ title: constants.MODAL_TITLE_ERROR, body: myBody });
+            setAlertModalShow(true);
+            setLoadingEdition(false);
+            setShowEditModal(false);
         }
-        setLoadingEdition(response.loadingReq);
-        setShowEditModal(response.loadingReq);
     };
 
     const handlePages = async (event, pageToQuery) => {
@@ -143,6 +137,35 @@ const Services = () => {
             ...prevState,
             [pageToQuery]: false
         }));
+    }
+
+    const onConfirm = async () => {
+        try {
+            setLoadingEdition(true);
+            const response = await createProduct(productDTO, headers);
+            setLoadingServices(response.loadingReq);
+
+
+            const newProduct = {
+                ...response.data,
+                category_id: productDTO.category_id
+            };
+
+            setProducts([newProduct, ...products]);
+
+            setMessagesToModal({ title: constants.MODAL_TITLE_SUCCCESS, body: constants.PRODUCT_CREATED });
+            setAlertModalShow(response.alertModalShow);
+            setConfirmModalShow(false);
+            setLoadingEdition(false);
+            reset();
+        } catch (error) {
+            console.log('error:', error);
+            const myBody = error?.response?.data.includes('jwt') ? constants.USER_SESSION_EXPIRED : error?.response?.data;
+            setMessagesToModal({ title: constants.MODAL_TITLE_ERROR, body: myBody });
+            setAlertModalShow(true);
+            setLoadingEdition(false);
+            setConfirmModalShow(false);
+        }
     }
 
     return (
@@ -384,6 +407,16 @@ const Services = () => {
                     </Button>
                 </Modal.Footer>
             </Modal>
+            <ConfirmModal
+                show={confirmModalShow}
+                onHide={() => setConfirmModalShow(false)}
+                title={'Confirmaci\u00f3n de creaci\u00f3n'}
+                bodyText={'¿Estás seguro que quieres crear el servicio?'}
+                size='md'
+                closeButton={0}
+                onConfirm={onConfirm}
+                loadingReq={loadingEdition}
+            />
             <AlertModal
                 show={alertModalShow}
                 onHide={() => onCloseModal()}
