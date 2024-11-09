@@ -17,7 +17,7 @@ function Sidebar() {
         </li>
 
         <li className="nav-item">
-          <NavLink to={"/home"} className={`nav-link ${(location.pathname === "/home") ? "active" : "collapsed"}`}>
+          <NavLink to={"/recharges"} className={`nav-link ${(location.pathname === "/recharges") ? "active" : "collapsed"}`}>
             <i className="bi bi-grid"></i>
             <span>Recargar saldo</span>
           </NavLink>
