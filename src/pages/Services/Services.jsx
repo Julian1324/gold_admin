@@ -70,7 +70,6 @@ const Services = () => {
         setConfirmModalShow(true);
         setLoadingServices(true);
         setProductDTO(productDTO);
-
     }
 
     const onCloseModal = () => {

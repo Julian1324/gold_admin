@@ -135,3 +135,35 @@ export const updateProduct = async (productDTO, headers) => {
         throw error;
     }
 }
+
+export const rechargeWallet = async (email, amount, headers) => {
+    try {
+        const response = await axiosInstance.post(
+            `${constants.API_URL + constants.POST_RECHARGE_WALLET}`,
+            { email, amount },
+            { headers }
+        );
+        if (response.status === 200) return {
+            data: response.data,
+            loadingReq: false,
+            alertModalShow: true
+        }
+    } catch (error) {
+        throw error;
+    }
+}
+
+export const rechargeMovements = async ({ page, headers }) => {
+    try {
+        const response = await axiosInstance.get(
+            `${constants.API_URL + constants.GET_ALL_RECHARGES}?${constants.PARAMS_PAGE + page}`,
+            { headers }
+        )
+        if (response.status === 200) return {
+            data: response.data,
+            loadingReq: false,
+        }
+    } catch (error) {
+        throw error;
+    }
+}
