@@ -38,6 +38,11 @@ function MyNavbar() {
         navigator('/');
     }
 
+    const onSignOut = () => {
+        localStorage.clear();
+        navigator('/');
+    }
+
     return (
         <>
             <Navbar fixed="top" className="header d-flex align-items-center" expand="lg">
@@ -82,7 +87,7 @@ function MyNavbar() {
                                 <NavDropdown.Divider />
                                 <NavDropdown.Item href="pages-faq.html"><i className="bi bi-question-circle"></i> Need Help?</NavDropdown.Item>
                                 <NavDropdown.Divider />
-                                <NavDropdown.Item href="."><i className="bi bi-box-arrow-right"></i> Sign Out</NavDropdown.Item>
+                                <NavDropdown.Item onClick={onSignOut} href="."><i className="bi bi-box-arrow-right"></i> Sign Out</NavDropdown.Item>
                             </NavDropdown>
                         </Nav>
                     </Navbar.Collapse>

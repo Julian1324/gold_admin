@@ -167,3 +167,18 @@ export const rechargeMovements = async ({ page, headers }) => {
         throw error;
     }
 }
+
+export const getTheRecharger = async ({ responsible, headers }) => {
+    try {
+        const response = await axiosInstance.get(
+            `${constants.API_URL + constants.GET_THE_RECHARGER}?${constants.PARAMS_RESPONSIBLE + responsible}`,
+            { headers }
+        )
+        if (response.status === 200) return {
+            data: response.data,
+            loadingReq: false,
+        }
+    } catch (error) {
+        throw error;
+    }
+}

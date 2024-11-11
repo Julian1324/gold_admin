@@ -26,6 +26,8 @@ const Services = () => {
     const [loadingPage, setLoadingPage] = useState({});
     const [confirmModalShow, setConfirmModalShow] = useState(false);
     const [productDTO, setProductDTO] = useState({});
+    const [errorDiscount, setErrorDiscount] = useState('');
+    const [errorPrice, setErrorPrice] = useState('');
 
     const {
         register,
@@ -87,6 +89,8 @@ const Services = () => {
     const handleEditClick = (row) => {
         setCurrentRow(row);
         setShowEditModal(true);
+        setErrorDiscount('');
+        setErrorPrice('');
     };
 
     const handleSave = async () => {
@@ -218,8 +222,10 @@ const Services = () => {
                             {...register('price', {
                                 required: 'El precio es obligatorio',
                                 valueAsNumber: true,
-                                min: { value: 0, message: 'El precio debe ser mayor o igual a 0' }
+                                min: { value: 100, message: 'El monto debe ser mayor o igual a 100.' }
                             })}
+                            placeholder="$0"
+                            autoComplete="false"
                         />
                         {errors.price && <span className="text-danger">{errors.price.message}</span>}
                     </div>
@@ -367,10 +373,14 @@ const Services = () => {
                                     type="number"
                                     step="100"
                                     value={currentRow.price}
-                                    onChange={(e) =>
-                                        setCurrentRow({ ...currentRow, price: e.target.value })
-                                    }
+                                    onChange={(e) => {
+                                        const value = parseInt(e.target.value);
+                                        if (value <= 0) return setErrorPrice('El precio debe ser mayor a 0.');
+                                        setErrorPrice('');
+                                        setCurrentRow({ ...currentRow, price: value })
+                                    }}
                                 />
+                                {errorPrice && <span className="text-danger">{errorPrice}</span>}
                             </Form.Group>
                             <Form.Group controlId="formDiscount">
                                 <Form.Label>Descuento</Form.Label>
@@ -378,10 +388,14 @@ const Services = () => {
                                     type="number"
                                     step="1"
                                     value={currentRow.discount}
-                                    onChange={(e) =>
-                                        setCurrentRow({ ...currentRow, discount: e.target.value })
-                                    }
+                                    onChange={(e) => {
+                                        const value = parseInt(e.target.value);
+                                        if (value < 0) return setErrorDiscount('El descuento debe ser igual o mayor a 0.');
+                                        setErrorDiscount('');
+                                        setCurrentRow({ ...currentRow, discount: value });
+                                    }}
                                 />
+                                {errorDiscount && <span className="text-danger">{errorDiscount}</span>}
                             </Form.Group>
                             <Form.Group controlId="formDiscount">
                                 <Form.Label>Descripcion</Form.Label>

@@ -11,6 +11,7 @@ const PRODUCT_CREATED = '¡Servicio creado exitosamente!';
 const PRODUCT_UPDATED = '¡Servicio actualizado exitosamente!';
 const GET_ALL_PRODUCTS = '/products';
 const GET_ALL_RECHARGES = '/rechargeMovements';
+const GET_THE_RECHARGER = '/getTheRecharger';
 const QUERY_PRODUCTS = '/queryProducts';
 const MODAL_TITLE_SUCCCESS = '¡Se ha realizado con éxito!';
 const MODAL_TITLE_ERROR = '¡Oops, error en la solicitud!';
@@ -18,11 +19,13 @@ const MODAL_TITLE_SIGNOUT = 'Desconexión exitosa.';
 const MODAL_BODY_SIGNOUT = 'Hasta luego, vuelve pronto...';
 const PARAMS_CATEGORY_ID = 'category_id=';
 const PARAMS_PAGE = 'page=';
+const PARAMS_RESPONSIBLE = 'responsible=';
 const PARAMS_PRODUCT = 'product=';
 const PARAMS_QUERY_PRODUCT = 'productQuery=';
 const PRODUCT_STATUS_ACTIVE = 'active';
 const PRODUCT_STATUS_INACTIVE = 'inactive';
 const LANGUAGE_TAG = 'es-CO';
+const CURRENCY_NAME = 'COP';
 const WIDTH_MOBILE = 500;
 const POST_RECHARGE_WALLET = '/rechargeWallet';
 const USER_RECHARGE_SUCCESSFULL = '¡Recarga realizada exitosamente!';
@@ -42,6 +45,7 @@ export const constants = Object.freeze({
     PRODUCT_UPDATED,
     GET_ALL_PRODUCTS,
     GET_ALL_RECHARGES,
+    GET_THE_RECHARGER,
     QUERY_PRODUCTS,
     MODAL_TITLE_SUCCCESS,
     MODAL_TITLE_ERROR,
@@ -49,11 +53,13 @@ export const constants = Object.freeze({
     MODAL_BODY_SIGNOUT,
     PARAMS_CATEGORY_ID,
     PARAMS_PAGE,
+    PARAMS_RESPONSIBLE,
     PARAMS_PRODUCT,
     PARAMS_QUERY_PRODUCT,
     PRODUCT_STATUS_ACTIVE,
     PRODUCT_STATUS_INACTIVE,
     LANGUAGE_TAG,
+    CURRENCY_NAME,
     WIDTH_MOBILE,
     POST_RECHARGE_WALLET,
     USER_RECHARGE_SUCCESSFULL,
