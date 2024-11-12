@@ -182,3 +182,18 @@ export const getTheRecharger = async ({ responsible, headers }) => {
         throw error;
     }
 }
+
+export const getProducts = async ({ headers }) => {
+    try {
+        const response = await axiosInstance.get(
+            `${constants.API_URL + constants.GET_PRODUCTS}`,
+            { headers }
+        )
+        if (response.status === 200) return {
+            data: response.data,
+            loadingReq: false,
+        }
+    } catch (error) {
+        throw error;
+    }
+}

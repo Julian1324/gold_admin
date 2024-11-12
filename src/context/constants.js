@@ -12,6 +12,7 @@ const PRODUCT_UPDATED = '¡Servicio actualizado exitosamente!';
 const GET_ALL_PRODUCTS = '/products';
 const GET_ALL_RECHARGES = '/rechargeMovements';
 const GET_THE_RECHARGER = '/getTheRecharger';
+const GET_PRODUCTS = '/getProducts';
 const QUERY_PRODUCTS = '/queryProducts';
 const MODAL_TITLE_SUCCCESS = '¡Se ha realizado con éxito!';
 const MODAL_TITLE_ERROR = '¡Oops, error en la solicitud!';
@@ -46,6 +47,7 @@ export const constants = Object.freeze({
     GET_ALL_PRODUCTS,
     GET_ALL_RECHARGES,
     GET_THE_RECHARGER,
+    GET_PRODUCTS,
     QUERY_PRODUCTS,
     MODAL_TITLE_SUCCCESS,
     MODAL_TITLE_ERROR,
