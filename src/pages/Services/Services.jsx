@@ -266,7 +266,7 @@ const Services = () => {
                     </div>
                     <div className="text-center">
                         <button type="reset" className="btn btn-secondary me-2">Limpiar</button>
-                        <button type="submit" className="btn btn-primary" style={{ width: '10rem' }}>
+                        <button type="submit" className="btn btn-primary" disabled={loadingServices} style={{ width: '10rem' }}>
                             Crear servicio
                             {loadingServices && <Spinner animation="border" role="status" size="sm" className='ms-2' />}
                         </button>
@@ -414,7 +414,7 @@ const Services = () => {
                     <Button variant="secondary" onClick={() => setShowEditModal(false)}>
                         Cancelar
                     </Button>
-                    <Button variant="primary" onClick={handleSave}>
+                    <Button variant="primary" disabled={loadingEdition} onClick={handleSave}>
                         Guardar
                         {loadingEdition && <Spinner animation="border" role="status" size="sm" className='ms-2' />}
                     </Button>
