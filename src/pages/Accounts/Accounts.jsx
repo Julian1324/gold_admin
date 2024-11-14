@@ -7,8 +7,10 @@ import { constants } from "../../context/constants";
 import Spinner from 'react-bootstrap/Spinner';
 import ConfirmModal from "../../shared/Modal/ConfirmModal";
 import { AlertModal } from "../../shared/Modal/AlertModal";
+import { useNavigate } from 'react-router-dom';
 
 const Accounts = () => {
+    const navigator = useNavigate();
     const [margin, setMargin] = useState({});
     const { headers } = getUserSlice();
     const [products, setProducts] = useState([]);
@@ -53,9 +55,16 @@ const Accounts = () => {
     }, [headers]);
 
     const onSubmit = async (form) => {
-        console.log(form);
-        setLoadingAccount(true);
-        reset();
+        const lastKey = Object.keys(profiles).at(Object.keys(profiles).length - 1);
+        const lastProfile = profiles[lastKey];
+        if (!lastProfile.name || !lastProfile.pin) {
+            setMessagesToModal({ title: constants.MODAL_TITLE_ERROR, body: 'Completa la información del perfil o de los perfiles.' });
+            setAlertModalShow(true);
+        } else {
+            setLoadingAccount(true);
+            setProfiles({ 1: { name: '', pin: '', status: true } });
+            reset();
+        }
     }
 
     const onConfirm = async () => {
@@ -78,7 +87,7 @@ const Accounts = () => {
 
     const onSubstractProfile = (e, key) => {
         e.preventDefault();
-        if (profiles.length === 1) return;
+        if (Object.keys(profiles).length === 1) return;
         const currentProfiles = { ...profiles };
         delete currentProfiles[key];
         setProfiles({ ...currentProfiles });
@@ -165,8 +174,8 @@ const Accounts = () => {
                                 <input
                                     type="text"
                                     className="form-control"
-                                    onChange={(e) => setProfiles({ ...profiles, [key]: { ...profiles[key], name: e.target.value } })}
-                                    value={profiles[key].name}
+                                    onChange={(e) => setProfiles({ ...profiles, [key]: { ...value, name: e.target.value } })}
+                                    value={value.name}
                                 />
                             </div>
                             <div className="col-md-4 ms-3">
@@ -174,8 +183,8 @@ const Accounts = () => {
                                 <input
                                     type="text"
                                     className="form-control"
-                                    onChange={(e) => setProfiles({ ...profiles, [key]: { ...profiles[key], pin: e.target.value } })}
-                                    value={profiles[key].pin}
+                                    onChange={(e) => setProfiles({ ...profiles, [key]: { ...value, pin: e.target.value } })}
+                                    value={value.pin}
                                 />
                             </div>
                             <div className="d-flex align-items-end mb-3 h-100 ms-3 form-check">
@@ -183,10 +192,10 @@ const Accounts = () => {
                                     type="checkbox"
                                     className="form-check-input me-1"
                                     defaultChecked
-                                    onChange={(e) => setProfiles({ ...profiles, [key]: { ...profiles[key], status: e.target.value } })}
-                                    value={profiles[key].status}
+                                    onChange={(e) => setProfiles({ ...profiles, [key]: { ...value, status: e.target.value } })}
+                                    value={value.status}
                                 />
-                                <label htmlFor="status" className="form-check-label">Estado (Activo/Inactivo)</label>
+                                <label htmlFor="status" className="form-check-label">Activo</label>
                             </div>
                             <div className="d-flex align-items-end h-100">
                                 <button
