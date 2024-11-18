@@ -197,3 +197,34 @@ export const getProducts = async ({ headers }) => {
         throw error;
     }
 }
+
+export const getAccountsPage = async ({ headers, page }) => {
+    try {
+        const response = await axiosInstance.get(
+            `${constants.API_URL + constants.GET_ACCOUNTS}?${constants.PARAMS_PAGE + page}`,
+            { headers }
+        )
+        if (response.status === 200) return {
+            data: response.data,
+            loadingReq: false,
+        }
+    } catch (error) {
+        throw error;
+    }
+}
+
+export const createAccount = async ({ headers, accountDTO }) => {
+    try {
+        const response = await axiosInstance.post(
+            `${constants.API_URL + constants.CREATE_ACCOUNT}`,
+            { ...accountDTO },
+            { headers }
+        )
+        if (response.status === 200) return {
+            data: response.data,
+            loadingReq: false,
+        }
+    } catch (error) {
+        throw error;
+    }
+}

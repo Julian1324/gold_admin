@@ -1,21 +1,24 @@
 const API_URL = process.env.REACT_APP_API_URL;
 const USER_SIGNIN = '/user/signinAdm';
 const USER_INFO = '/user';
-const USER_LOGGED = '¡Bienvenid@ a Gold Admin!';
+const USER_LOGGED = '\u00A1Bienvenid@ a Gold Admin!';
 const USER_SESSION_EXPIRED = 'Sesión caducada, por favor inicia sesión otra vez.';
 const GET_CATEGORIES = '/categories';
 const GET_PRODUCTS_BY_CATEGORY = '/productsByCategory';
 const GET_PRODUCT_BY_ID = '/product';
 const CREATE_PRODUCT = '/product';
-const PRODUCT_CREATED = '¡Servicio creado exitosamente!';
-const PRODUCT_UPDATED = '¡Servicio actualizado exitosamente!';
+const PRODUCT_CREATED = '\u00A1Servicio creado exitosamente!';
+const PRODUCT_UPDATED = '\u00A1Servicio actualizado exitosamente!';
 const GET_ALL_PRODUCTS = '/products';
 const GET_ALL_RECHARGES = '/rechargeMovements';
 const GET_THE_RECHARGER = '/getTheRecharger';
 const GET_PRODUCTS = '/getProducts';
+const GET_ACCOUNTS = '/getAccountsPage';
+const CREATE_ACCOUNT = '/createAccount';
+const ACCOUNT_CREATED = '\u00A1Cuenta creada exitosamente!';
 const QUERY_PRODUCTS = '/queryProducts';
-const MODAL_TITLE_SUCCCESS = '¡Se ha realizado con éxito!';
-const MODAL_TITLE_ERROR = '¡Oops, error en la solicitud!';
+const MODAL_TITLE_SUCCCESS = '\u00A1Se ha realizado con éxito!';
+const MODAL_TITLE_ERROR = '\u00A1Oops, error en la solicitud!';
 const MODAL_TITLE_SIGNOUT = 'Desconexión exitosa.';
 const MODAL_BODY_SIGNOUT = 'Hasta luego, vuelve pronto...';
 const PARAMS_CATEGORY_ID = 'category_id=';
@@ -48,6 +51,9 @@ export const constants = Object.freeze({
     GET_ALL_RECHARGES,
     GET_THE_RECHARGER,
     GET_PRODUCTS,
+    GET_ACCOUNTS,
+    CREATE_ACCOUNT,
+    ACCOUNT_CREATED,
     QUERY_PRODUCTS,
     MODAL_TITLE_SUCCCESS,
     MODAL_TITLE_ERROR,

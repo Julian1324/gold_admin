@@ -1,24 +1,30 @@
 import { useEffect, useState } from "react";
 import { getUserSlice } from '../../context/store/store';
 import { useForm, Controller } from 'react-hook-form';
-import { getProducts } from "../../helpers/axiosHelper";
+import { createAccount, getAccountsPage, getProducts } from "../../helpers/axiosHelper";
 import Select from 'react-select';
 import { constants } from "../../context/constants";
 import Spinner from 'react-bootstrap/Spinner';
 import ConfirmModal from "../../shared/Modal/ConfirmModal";
 import { AlertModal } from "../../shared/Modal/AlertModal";
 import { useNavigate } from 'react-router-dom';
+import { Table, Button } from 'react-bootstrap';
+import { timeFormatter } from "../../helpers/timeZoneHelper";
 
 const Accounts = () => {
     const navigator = useNavigate();
     const [margin, setMargin] = useState({});
     const { headers } = getUserSlice();
     const [products, setProducts] = useState([]);
+    const [accounts, setAccounts] = useState([]);
     const [messagesToModal, setMessagesToModal] = useState({ title: '', body: '' });
     const [loadingAccount, setLoadingAccount] = useState(false);
     const [alertModalShow, setAlertModalShow] = useState(false);
     const [confirmModalShow, setConfirmModalShow] = useState(false);
     const [profiles, setProfiles] = useState({ 1: { name: '', pin: '', status: true } });
+    const [accountDTO, setAccountDTO] = useState({});
+    const [paginator, setPaginator] = useState({});
+    const [loadingPage, setLoadingPage] = useState({});
 
     const {
         register,
@@ -51,27 +57,67 @@ const Accounts = () => {
 
         }
 
+        const getTheAccounts = async () => {
+            try {
+                const response = await getAccountsPage({ headers, page: 1 });
+                setAccounts(response.data.docs);
+                delete response.data.docs;
+                setPaginator(response.data);
+            } catch (error) {
+                console.log('error:', error);
+                const myBody = error?.response?.data.includes('jwt') ? constants.USER_SESSION_EXPIRED : error?.response?.data;
+                setMessagesToModal({ title: constants.MODAL_TITLE_ERROR, body: myBody });
+                setAlertModalShow(true);
+            }
+        }
+        getTheAccounts();
         getTheProducts();
     }, [headers]);
 
     const onSubmit = async (form) => {
-        const lastKey = Object.keys(profiles).at(Object.keys(profiles).length - 1);
-        const lastProfile = profiles[lastKey];
-        if (!lastProfile.name || !lastProfile.pin) {
+        let incompleteProfiles = [];
+        let selectedProfiles = [];
+
+        for (const profile of Object.values(profiles)) {
+            if (!profile.name || !profile.pin)
+                incompleteProfiles.push(profile);
+            else
+                selectedProfiles.push(profile);
+        }
+
+        if (incompleteProfiles.length > 0) {
             setMessagesToModal({ title: constants.MODAL_TITLE_ERROR, body: 'Completa la información del perfil o de los perfiles.' });
             setAlertModalShow(true);
         } else {
-            setLoadingAccount(true);
-            setProfiles({ 1: { name: '', pin: '', status: true } });
-            reset();
+            const { email, password, selectedProduct } = form;
+            const accountDTO = {
+                email,
+                password,
+                productID: selectedProduct._id,
+                profiles: selectedProfiles
+            };
+            
+            setAccountDTO(accountDTO);
+            setConfirmModalShow(true);
         }
     }
 
     const onConfirm = async () => {
         try {
-
+            setLoadingAccount(true);
+            const response = await createAccount({ headers, accountDTO });
+            setAccounts([response.data, ...accounts]);
+            setLoadingAccount(response.loadingReq);
+            setProfiles({ 1: { name: '', pin: '', status: true } });
+            setConfirmModalShow(false);
+            setMessagesToModal({ title: constants.MODAL_TITLE_SUCCCESS, body: constants.ACCOUNT_CREATED });
+            setAlertModalShow(true);
+            reset();
         } catch (error) {
-
+            console.log('error:', error);
+            const myBody = error?.response?.data.includes('jwt') ? constants.USER_SESSION_EXPIRED : error?.response?.data;
+            setMessagesToModal({ title: constants.MODAL_TITLE_ERROR, body: myBody });
+            setAlertModalShow(true);
         }
     }
 
@@ -99,6 +145,32 @@ const Accounts = () => {
         setProfiles({ ...profiles, [nextKey]: { name: '', pin: '', status: true } });
     }
 
+    const handlePages = async (event, pageToQuery) => {
+        event.preventDefault();
+        if (pageToQuery === paginator.page) return;
+        setLoadingPage(prevState => ({
+            ...prevState,
+            [pageToQuery]: true
+        }));
+
+        const { data } = await getAccountsPage({ headers, page: pageToQuery });
+        const {
+            docs, hasNextPage, hasPrevPage, limit, nextPage,
+            page, pagingCounter, prevPage, totalDocs, totalPages
+        } = data;
+
+        setAccounts(docs);
+
+        setPaginator({
+            hasNextPage, hasPrevPage, limit, nextPage, page,
+            pagingCounter, prevPage, totalDocs, totalPages
+        });
+        setLoadingPage(prevState => ({
+            ...prevState,
+            [pageToQuery]: false
+        }));
+    }
+
     return (
         <>
             <div
@@ -108,6 +180,7 @@ const Accounts = () => {
                         marginLeft: (margin.marginLeft ? margin.marginLeft : 0) + 30,
                         marginTop: (margin.marginTop ? margin.marginTop : 0) + 30,
                         width: '75%',
+                        boxShadow: '0px 0px 20px rgba(1, 41, 112, 0.1)'
                     }
                 }
             >
@@ -229,11 +302,88 @@ const Accounts = () => {
                 </form>
 
             </div>
+            <div
+                className="mt-3"
+                style={
+                    {
+                        marginLeft: (margin.marginLeft ? margin.marginLeft : 0) + 30,
+                        width: '75%',
+                        boxShadow: '0px 0px 20px rgba(1, 41, 112, 0.1)',
+                        padding: '1rem',
+                        backgroundColor: 'white',
+                        borderRadius: '0.3rem'
+                    }
+                }
+            >
+                <Table bordered hover>
+                    <thead>
+                        <tr>
+                            <th>Fecha</th>
+                            <th>Tipo</th>
+                            <th>Email</th>
+                            <th>Contraseña</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {accounts.map((account, accIndex) =>
+                            <tr key={accIndex}>
+                                <td>{timeFormatter(account.createdAt)}</td>
+                                <td>{products.find((product) => product._id === account.productID).name}</td>
+                                <td>{account.email}</td>
+                                <td>{account.password}</td>
+                                <td>
+                                    <Button
+                                        variant="primary"
+                                        disabled={false}
+                                    >
+                                        Ver detalles
+                                        {false && <Spinner animation="border" role="status" size="sm" className='ms-2' />}
+                                    </Button>
+                                </td>
+                            </tr>
+                        )}
+                    </tbody>
+                </Table>
+                <div className="d-flex justify-content-center">
+                    <nav aria-label="Page navigation example">
+                        <ul className="pagination">
+                            {paginator.prevPage &&
+                                <li className="page-item" onClick={(event) => handlePages(event, paginator.prevPage)}>
+                                    <a className="page-link" href=".">
+                                        Atrás
+                                    </a>
+                                </li>
+                            }
+                            {Array(paginator.totalPages).fill('').map((_, pageIndex) => {
+                                return (
+                                    <li
+                                        className={paginator.page === (pageIndex + 1) ? "page-item active" : "page-item"}
+                                        key={pageIndex}
+                                        onClick={(event) => handlePages(event, (pageIndex + 1))}
+                                    >
+                                        <a className="page-link" href=".">
+                                            {loadingPage[pageIndex + 1] ? <Spinner animation="border" size="sm" /> : (pageIndex + 1)}
+                                        </a>
+                                    </li>
+                                )
+                            })}
+                            {paginator.hasNextPage &&
+                                <li className="page-item fixedSize" onClick={(event) => handlePages(event, paginator.nextPage)}>
+                                    <a className="page-link" href=".">
+                                        Adelante
+                                    </a>
+                                </li>
+                            }
+                        </ul>
+                    </nav>
+                </div>
+            </div>
             <ConfirmModal
                 show={confirmModalShow}
                 onHide={() => setConfirmModalShow(false)}
                 title={'Confirmaci\u00f3n de creaci\u00f3n'}
-                bodyText={'¿Estás seguro que quieres crear el servicio?'}
+                bodyText={'¿Estás seguro que quieres crear la cuenta?'}
                 size='md'
                 closeButton={0}
                 onConfirm={onConfirm}
