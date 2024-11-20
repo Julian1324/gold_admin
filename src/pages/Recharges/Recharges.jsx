@@ -172,7 +172,7 @@ const Recharges = () => {
                     </div>
 
                     <div className="text-center">
-                        <button type="reset" className="btn btn-secondary me-2">Limpiar</button>
+                        <button type="reset" className="btn btn-secondary me-2" onClick={() => reset()}>Limpiar</button>
                         <button type="submit" className="btn btn-primary" disabled={loadingRecharge} style={{ width: '12rem' }}>
                             Recargar monto
                             {loadingRecharge && <Spinner animation="border" role="status" size="sm" className='ms-2' />}

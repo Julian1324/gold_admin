@@ -16,6 +16,7 @@ const GET_PRODUCTS = '/getProducts';
 const GET_ACCOUNTS = '/getAccountsPage';
 const CREATE_ACCOUNT = '/createAccount';
 const ACCOUNT_CREATED = '\u00A1Cuenta creada exitosamente!';
+const ACCOUNT_STATUS = { true: 'Activo', false: 'Inactivo' };
 const QUERY_PRODUCTS = '/queryProducts';
 const MODAL_TITLE_SUCCCESS = '\u00A1Se ha realizado con éxito!';
 const MODAL_TITLE_ERROR = '\u00A1Oops, error en la solicitud!';
@@ -54,6 +55,7 @@ export const constants = Object.freeze({
     GET_ACCOUNTS,
     CREATE_ACCOUNT,
     ACCOUNT_CREATED,
+    ACCOUNT_STATUS,
     QUERY_PRODUCTS,
     MODAL_TITLE_SUCCCESS,
     MODAL_TITLE_ERROR,

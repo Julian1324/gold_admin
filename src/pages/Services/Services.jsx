@@ -70,7 +70,6 @@ const Services = () => {
             status: true
         };
         setConfirmModalShow(true);
-        setLoadingServices(true);
         setProductDTO(productDTO);
     }
 
@@ -91,7 +90,7 @@ const Services = () => {
         setShowEditModal(true);
         setErrorDiscount('');
         setErrorPrice('');
-    };
+    }
 
     const handleSave = async () => {
         try {
@@ -114,7 +113,7 @@ const Services = () => {
             setLoadingEdition(false);
             setShowEditModal(false);
         }
-    };
+    }
 
     const handlePages = async (event, pageToQuery) => {
         event.preventDefault();
@@ -145,9 +144,9 @@ const Services = () => {
     const onConfirm = async () => {
         try {
             setLoadingEdition(true);
+            setLoadingServices(true);
             const response = await createProduct(productDTO, headers);
             setLoadingServices(response.loadingReq);
-
 
             const newProduct = {
                 ...response.data,
@@ -265,7 +264,7 @@ const Services = () => {
                         <label htmlFor="isEntire" className="form-check-label">Venta por perfiles</label>
                     </div>
                     <div className="text-center">
-                        <button type="reset" className="btn btn-secondary me-2">Limpiar</button>
+                        <button type="reset" className="btn btn-secondary me-2" onClick={() => reset()}>Limpiar</button>
                         <button type="submit" className="btn btn-primary" disabled={loadingServices} style={{ width: '10rem' }}>
                             Crear servicio
                             {loadingServices && <Spinner animation="border" role="status" size="sm" className='ms-2' />}

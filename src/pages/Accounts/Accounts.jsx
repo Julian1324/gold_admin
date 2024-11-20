@@ -8,7 +8,7 @@ import Spinner from 'react-bootstrap/Spinner';
 import ConfirmModal from "../../shared/Modal/ConfirmModal";
 import { AlertModal } from "../../shared/Modal/AlertModal";
 import { useNavigate } from 'react-router-dom';
-import { Table, Button } from 'react-bootstrap';
+import { Table, Button, Modal, Form } from 'react-bootstrap';
 import { timeFormatter } from "../../helpers/timeZoneHelper";
 
 const Accounts = () => {
@@ -25,6 +25,9 @@ const Accounts = () => {
     const [accountDTO, setAccountDTO] = useState({});
     const [paginator, setPaginator] = useState({});
     const [loadingPage, setLoadingPage] = useState({});
+    const [showEditModal, setShowEditModal] = useState(false);
+    const [currentRow, setCurrentRow] = useState(null);
+    const [loadingEdition, setLoadingEdition] = useState(false);
 
     const {
         register,
@@ -96,7 +99,7 @@ const Accounts = () => {
                 productID: selectedProduct._id,
                 profiles: selectedProfiles
             };
-            
+
             setAccountDTO(accountDTO);
             setConfirmModalShow(true);
         }
@@ -171,6 +174,26 @@ const Accounts = () => {
         }));
     }
 
+    const handleEditClick = (row) => {
+        setCurrentRow(row);
+        setShowEditModal(true);
+    }
+
+    const handleSave = async () => {
+        try {
+            setLoadingEdition(true);
+            console.log('currentRow', currentRow); // Actualizar en base de datos
+            
+        } catch (error) {
+            console.log('error:', error);
+            const myBody = error?.response?.data.includes('jwt') ? constants.USER_SESSION_EXPIRED : error?.response?.data;
+            setMessagesToModal({ title: constants.MODAL_TITLE_ERROR, body: myBody });
+            setAlertModalShow(true);
+            setLoadingEdition(false);
+            setShowEditModal(false);
+        }
+    };
+
     return (
         <>
             <div
@@ -194,7 +217,7 @@ const Accounts = () => {
                             name="selectedProduct"
                             control={control}
                             defaultValue=""
-                            rules={{ required: 'Selecciona una categoría.' }}
+                            rules={{ required: 'Selecciona un servicio.' }}
                             render={({ field, fieldState: { error } }) => (
                                 <>
                                     <Select
@@ -293,7 +316,7 @@ const Accounts = () => {
 
 
                     <div className="text-center mt-5">
-                        <button type="reset" className="btn btn-secondary me-2">Limpiar</button>
+                        <button type="reset" className="btn btn-secondary me-2" onClick={() => reset()}>Limpiar</button>
                         <button type="submit" className="btn btn-primary" disabled={loadingAccount} style={{ width: '10rem' }}>
                             Crear cuenta
                             {loadingAccount && <Spinner animation="border" role="status" size="sm" className='ms-2' />}
@@ -322,6 +345,7 @@ const Accounts = () => {
                             <th>Tipo</th>
                             <th>Email</th>
                             <th>Contraseña</th>
+                            <th>Disponibilidad</th>
                             <th>Acciones</th>
                         </tr>
                     </thead>
@@ -332,13 +356,15 @@ const Accounts = () => {
                                 <td>{products.find((product) => product._id === account.productID).name}</td>
                                 <td>{account.email}</td>
                                 <td>{account.password}</td>
+                                <td>{constants.ACCOUNT_STATUS[account.status]}</td>
                                 <td>
                                     <Button
-                                        variant="primary"
-                                        disabled={false}
+                                        variant="warning"
+                                        disabled={loadingEdition}
+                                        onClick={() => handleEditClick(account)}
                                     >
-                                        Ver detalles
-                                        {false && <Spinner animation="border" role="status" size="sm" className='ms-2' />}
+                                        Editar
+                                        {loadingEdition && <Spinner animation="border" role="status" size="sm" className='ms-2' />}
                                     </Button>
                                 </td>
                             </tr>
@@ -379,6 +405,93 @@ const Accounts = () => {
                     </nav>
                 </div>
             </div>
+            <Modal centered size="md" show={showEditModal} onHide={() => setShowEditModal(false)}>
+                <Modal.Header closeButton>
+                    <Modal.Title>Editar cuenta</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    {currentRow && (
+                        <Form>
+                            <Form.Group controlId="formType">
+                                <Form.Label>Tipo</Form.Label>
+                                <Select
+                                    value={products.find((product) => product._id === currentRow.productID) || null}
+                                    onChange={(selectedOption) =>
+                                        setCurrentRow({ ...currentRow, productID: selectedOption._id })
+                                    }
+                                    options={products}
+                                />
+                            </Form.Group>
+                            <Form.Group controlId="formEmail">
+                                <Form.Label>Email</Form.Label>
+                                <Form.Control
+                                    type="text"
+                                    value={currentRow.email}
+                                    onChange={(e) => {
+                                        setCurrentRow({ ...currentRow, email: e.target.value })
+                                    }}
+                                />
+                            </Form.Group>
+                            <Form.Group controlId="formPassword">
+                                <Form.Label>Contraseña</Form.Label>
+                                <Form.Control
+                                    type="text"
+                                    value={currentRow.password}
+                                    onChange={(e) => {
+                                        setCurrentRow({ ...currentRow, password: e.target.value });
+                                    }}
+                                />
+                            </Form.Group>
+                            <Form.Group controlId="formDisponibility">
+                                <Form.Label>Disponibilidad</Form.Label>
+                                <Form.Control
+                                    type="text"
+                                    value={constants.ACCOUNT_STATUS[currentRow.status]}
+                                    disabled={true}
+                                />
+                            </Form.Group>
+
+                            <h5 className="d-flex justify-content-center card-title mt-5">Perfiles</h5>
+
+                            {currentRow.profiles.map((profile, key) =>
+                                <div key={key}>
+                                    <Form.Group controlId="formName">
+                                        <Form.Label>Nombre</Form.Label>
+                                        <Form.Control
+                                            type="text"
+                                            value={profile.name}
+                                            onChange={(e) => {
+                                                currentRow.profiles[key].name = e.target.value;
+                                                setCurrentRow({ ...currentRow });
+                                            }}
+                                        />
+                                    </Form.Group>
+                                    <Form.Group controlId="formPin">
+                                        <Form.Label>PIN</Form.Label>
+                                        <Form.Control
+                                            type="text"
+                                            value={profile.pin}
+                                            onChange={(e) => {
+                                                currentRow.profiles[key].pin = e.target.value;
+                                                setCurrentRow({ ...currentRow });
+                                            }}
+                                        />
+                                    </Form.Group>
+                                </div>
+                            )}
+                        </Form>
+                    )}
+                </Modal.Body>
+                <Modal.Footer>
+                    <Button variant="secondary" onClick={() => setShowEditModal(false)}>
+                        Cancelar
+                    </Button>
+                    <Button variant="primary" disabled={loadingEdition} onClick={handleSave}>
+                        Guardar
+                        {loadingEdition && <Spinner animation="border" role="status" size="sm" className='ms-2' />}
+                    </Button>
+                </Modal.Footer>
+            </Modal>
             <ConfirmModal
                 show={confirmModalShow}
                 onHide={() => setConfirmModalShow(false)}
