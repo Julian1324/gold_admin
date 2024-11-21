@@ -15,10 +15,12 @@ const GET_THE_RECHARGER = '/getTheRecharger';
 const GET_PRODUCTS = '/getProducts';
 const GET_ACCOUNTS = '/getAccountsPage';
 const CREATE_ACCOUNT = '/createAccount';
+const UPDATE_ACCOUNT = '/updateAccount';
 const ACCOUNT_CREATED = '\u00A1Cuenta creada exitosamente!';
+const UPDATED_ACCOUNT = '\u00A1Cuenta actualizada exitosamente!';
 const ACCOUNT_STATUS = { true: 'Activo', false: 'Inactivo' };
 const QUERY_PRODUCTS = '/queryProducts';
-const MODAL_TITLE_SUCCCESS = '\u00A1Se ha realizado con éxito!';
+const MODAL_TITLE_SUCCCESS = '\u00A1Se ha realizado con \u00E9xito!';
 const MODAL_TITLE_ERROR = '\u00A1Oops, error en la solicitud!';
 const MODAL_TITLE_SIGNOUT = 'Desconexión exitosa.';
 const MODAL_BODY_SIGNOUT = 'Hasta luego, vuelve pronto...';
@@ -54,7 +56,9 @@ export const constants = Object.freeze({
     GET_PRODUCTS,
     GET_ACCOUNTS,
     CREATE_ACCOUNT,
+    UPDATE_ACCOUNT,
     ACCOUNT_CREATED,
+    UPDATED_ACCOUNT,
     ACCOUNT_STATUS,
     QUERY_PRODUCTS,
     MODAL_TITLE_SUCCCESS,

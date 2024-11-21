@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { getUserSlice } from '../../context/store/store';
 import { useForm, Controller } from 'react-hook-form';
-import { createAccount, getAccountsPage, getProducts } from "../../helpers/axiosHelper";
+import { createAccount, getAccountsPage, getProducts, updateAccount } from "../../helpers/axiosHelper";
 import Select from 'react-select';
 import { constants } from "../../context/constants";
 import Spinner from 'react-bootstrap/Spinner';
@@ -182,8 +182,18 @@ const Accounts = () => {
     const handleSave = async () => {
         try {
             setLoadingEdition(true);
-            console.log('currentRow', currentRow); // Actualizar en base de datos
-            
+            const response = await updateAccount({ headers, ...currentRow });
+
+            const accountsCopy = [...accounts];
+            const accountsUpdated = accountsCopy.map((account) => {
+                return account._id === response.data._id ? response.data : account;
+            });
+
+            setAccounts(accountsUpdated);
+            setLoadingEdition(response.loadingReq);
+            setShowEditModal(response.loadingReq);
+            setMessagesToModal({ title: constants.MODAL_TITLE_SUCCCESS, body: constants.UPDATED_ACCOUNT });
+            setAlertModalShow(true);
         } catch (error) {
             console.log('error:', error);
             const myBody = error?.response?.data.includes('jwt') ? constants.USER_SESSION_EXPIRED : error?.response?.data;
@@ -353,7 +363,7 @@ const Accounts = () => {
                         {accounts.map((account, accIndex) =>
                             <tr key={accIndex}>
                                 <td>{timeFormatter(account.createdAt)}</td>
-                                <td>{products.find((product) => product._id === account.productID).name}</td>
+                                <td>{products.find((product) => product._id === account.productID)?.name}</td>
                                 <td>{account.email}</td>
                                 <td>{account.password}</td>
                                 <td>{constants.ACCOUNT_STATUS[account.status]}</td>
@@ -420,6 +430,7 @@ const Accounts = () => {
                                         setCurrentRow({ ...currentRow, productID: selectedOption._id })
                                     }
                                     options={products}
+                                    isDisabled={true}
                                 />
                             </Form.Group>
                             <Form.Group controlId="formEmail">
@@ -456,7 +467,7 @@ const Accounts = () => {
                             {currentRow.profiles.map((profile, key) =>
                                 <div key={key}>
                                     <Form.Group controlId="formName">
-                                        <Form.Label>Nombre</Form.Label>
+                                        <Form.Label>Nombre ({key + 1})</Form.Label>
                                         <Form.Control
                                             type="text"
                                             value={profile.name}
@@ -467,7 +478,7 @@ const Accounts = () => {
                                         />
                                     </Form.Group>
                                     <Form.Group controlId="formPin">
-                                        <Form.Label>PIN</Form.Label>
+                                        <Form.Label>PIN ({key + 1})</Form.Label>
                                         <Form.Control
                                             type="text"
                                             value={profile.pin}

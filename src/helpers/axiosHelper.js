@@ -228,3 +228,19 @@ export const createAccount = async ({ headers, accountDTO }) => {
         throw error;
     }
 }
+
+export const updateAccount = async ({ headers, _id, productID, email, password, profiles, status }) => {
+    try {
+        const response = await axiosInstance.post(
+            `${constants.API_URL + constants.UPDATE_ACCOUNT}`,
+            { _id, productID, email, password, profiles, status },
+            { headers }
+        )
+        if (response.status === 200) return {
+            data: response.data,
+            loadingReq: false,
+        }
+    } catch (error) {
+        throw error;
+    }
+}
