@@ -202,7 +202,12 @@ const Accounts = () => {
             setLoadingEdition(false);
             setShowEditModal(false);
         }
-    };
+    }
+
+    const statusOptions = Object.entries(constants.ACCOUNT_STATUS).map(([key, value]) => ({
+        value: key === "true",
+        label: value,
+    }));
 
     return (
         <>
@@ -455,10 +460,15 @@ const Accounts = () => {
                             </Form.Group>
                             <Form.Group controlId="formDisponibility">
                                 <Form.Label>Disponibilidad</Form.Label>
-                                <Form.Control
-                                    type="text"
-                                    value={constants.ACCOUNT_STATUS[currentRow.status]}
-                                    disabled={true}
+                                <Select
+                                    value={{
+                                        label: constants.ACCOUNT_STATUS[currentRow.status],
+                                        value: Object.keys(constants.ACCOUNT_STATUS).find((status) => status === currentRow.status)
+                                    }}
+                                    onChange={(selectedOption) =>
+                                        setCurrentRow({ ...currentRow, status: selectedOption.value })
+                                    }
+                                    options={statusOptions}
                                 />
                             </Form.Group>
 
