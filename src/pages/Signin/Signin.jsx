@@ -89,7 +89,7 @@ const Signin = () => {
                                                         required: 'El email es requerido.',
                                                         pattern: {
                                                             value: /^[^@ ]+@[^@ ]+\.[^@ .]{2,}$/,
-                                                            message: 'El email es inválido.'
+                                                            message: 'El email es inv\u00e1lido.'
                                                         }
                                                     })}
                                                 />
