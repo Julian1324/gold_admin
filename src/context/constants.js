@@ -36,6 +36,10 @@ const CURRENCY_NAME = 'COP';
 const WIDTH_MOBILE = 500;
 const POST_RECHARGE_WALLET = '/rechargeWallet';
 const USER_RECHARGE_SUCCESSFULL = '¡Recarga realizada exitosamente!';
+const USER_OPTIONS = {
+    admin: { recharges: true, accounts: true },
+    superadmin: { services: true, recharges: true, accounts: true }
+};
 const KEY_STORAGE_BASE = 'GLDST0';
 
 export const constants = Object.freeze({
@@ -77,5 +81,6 @@ export const constants = Object.freeze({
     WIDTH_MOBILE,
     POST_RECHARGE_WALLET,
     USER_RECHARGE_SUCCESSFULL,
+    USER_OPTIONS,
     KEY_STORAGE_BASE
 });

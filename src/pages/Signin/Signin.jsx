@@ -33,6 +33,7 @@ const Signin = () => {
                 setAlertModalShow(response.alertModalShow);
             }
             reset();
+            // console.log('response?.data', constants.USER_OPTIONS[response?.data.role]);
             updateHeaders(response?.data?.token);
             updateUserName(response?.data?.name);
         } catch (error) {
