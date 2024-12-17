@@ -14,7 +14,7 @@ const Services = () => {
     const navigator = useNavigate();
     const [margin, setMargin] = useState({});
     const { categories } = getCategorySlice();
-    const { headers } = getUserSlice();
+    const { headers, getUserOptions } = getUserSlice();
     const [alertModalShow, setAlertModalShow] = useState(false);
     const [messagesToModal, setMessagesToModal] = useState({ title: '', body: '' });
     const [loadingServices, setLoadingServices] = useState(false);
@@ -43,6 +43,7 @@ const Services = () => {
             marginLeft,
             marginTop
         });
+        // if (!getUserOptions().services) return navigator('../recharges');
         if (!Object.keys(headers).length) return;
         const getProducts = async () => {
             const { data } = await getAllProducts({ page: 1 });
@@ -59,7 +60,7 @@ const Services = () => {
             });
         }
         getProducts();
-    }, [headers]);
+    }, [headers, getUserOptions]);
 
     const onSubmit = async (form) => {
         const productDTO = {
