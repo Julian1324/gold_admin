@@ -37,13 +37,14 @@ const Services = () => {
     } = useForm();
 
     useEffect(() => {
+        const uOptions = getUserOptions();
+        if (!uOptions.services) return navigator(`../${Object.keys(uOptions)[0]}`);
         const marginLeft = document.querySelector('.sidebar').clientWidth;
         const marginTop = document.querySelector('.header').clientHeight;
         if (marginLeft && marginTop) setMargin({
             marginLeft,
             marginTop
         });
-        // if (!getUserOptions().services) return navigator('../recharges');
         if (!Object.keys(headers).length) return;
         const getProducts = async () => {
             const { data } = await getAllProducts({ page: 1 });
@@ -60,7 +61,7 @@ const Services = () => {
             });
         }
         getProducts();
-    }, [headers, getUserOptions]);
+    }, [headers, getUserOptions, navigator]);
 
     const onSubmit = async (form) => {
         const productDTO = {

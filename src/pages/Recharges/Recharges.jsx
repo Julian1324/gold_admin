@@ -13,7 +13,7 @@ import { currencyValue } from "../../helpers/currencyHelper";
 
 const Recharges = () => {
     const [margin, setMargin] = useState({});
-    const { headers } = getUserSlice();
+    const { headers, getUserOptions } = getUserSlice();
     const [loadingRecharge, setLoadingRecharge] = useState(false);
     const [loadingResponsible, setLoadingResponsible] = useState(false);
     const [confirmModalShow, setConfirmModalShow] = useState(false);
@@ -34,6 +34,8 @@ const Recharges = () => {
     } = useForm();
 
     useEffect(() => {
+        const uOptions = getUserOptions();
+        if (!uOptions.recharges) return navigator(`../${Object.keys(uOptions)[0]}`);
         const marginLeft = document.querySelector('.sidebar').clientWidth;
         const marginTop = document.querySelector('.header').clientHeight;
         if (marginLeft && marginTop) setMargin({
@@ -55,7 +57,7 @@ const Recharges = () => {
             }
         }
         getRecharges();
-    }, [headers]);
+    }, [headers, getUserOptions]);
 
     const onSubmit = async (form) => {
         setRechargeDTO({ ...form });
