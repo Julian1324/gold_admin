@@ -36,6 +36,7 @@ const CURRENCY_NAME = 'COP';
 const WIDTH_MOBILE = 500;
 const POST_RECHARGE_WALLET = '/rechargeWallet';
 const USER_RECHARGE_SUCCESSFULL = '¡Recarga realizada exitosamente!';
+const MAX_VISIBLE_PAGES = 5;
 const USER_OPTIONS = {
     admin: { recharges: true, accounts: true },
     superadmin: { services: true, recharges: true, accounts: true }
@@ -81,6 +82,7 @@ export const constants = Object.freeze({
     WIDTH_MOBILE,
     POST_RECHARGE_WALLET,
     USER_RECHARGE_SUCCESSFULL,
+    MAX_VISIBLE_PAGES,
     USER_OPTIONS,
     KEY_STORAGE_BASE
 });

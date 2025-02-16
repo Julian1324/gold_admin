@@ -28,6 +28,9 @@ const Services = () => {
     const [productDTO, setProductDTO] = useState({});
     const [errorDiscount, setErrorDiscount] = useState('');
     const [errorPrice, setErrorPrice] = useState('');
+    const startPage = Math.max(1, paginator.page - Math.floor(constants.MAX_VISIBLE_PAGES / 2));
+    const endPage = Math.min(paginator.totalPages, startPage + constants.MAX_VISIBLE_PAGES - 1);
+    const pages = Array.from({ length: endPage - startPage + 1 }, (_, i) => startPage + i);
 
     const {
         register,
@@ -327,19 +330,38 @@ const Services = () => {
                                     </a>
                                 </li>
                             }
-                            {Array(paginator.totalPages).fill('').map((_, pageIndex) => {
-                                return (
-                                    <li
-                                        className={paginator.page === (pageIndex + 1) ? "page-item active" : "page-item"}
-                                        key={pageIndex}
-                                        onClick={(event) => handlePages(event, (pageIndex + 1))}
-                                    >
-                                        <a className="page-link" href=".">
-                                            {loadingPage[pageIndex + 1] ? <Spinner animation="border" size="sm" /> : (pageIndex + 1)}
-                                        </a>
+
+                            {startPage > 1 && (
+                                <>
+                                    <li className="page-item" onClick={(event) => handlePages(event, 1)}>
+                                        <a className="page-link" href=".">1</a>
                                     </li>
-                                )
-                            })}
+                                    {startPage > 2 && <li className="page-item disabled"><span className="page-link">...</span></li>}
+                                </>
+                            )}
+
+                            {pages.map((pageIndex) => (
+                                <li
+                                    className={paginator.page === pageIndex ? "page-item active" : "page-item"}
+                                    key={pageIndex}
+                                    onClick={(event) => handlePages(event, pageIndex)}
+                                >
+                                    <a className="page-link" href=".">
+                                        {loadingPage[pageIndex] ? <Spinner animation="border" size="sm" /> : pageIndex}
+                                    </a>
+                                </li>
+                            ))}
+
+                            {endPage < paginator.totalPages && (
+                                <>
+                                    {endPage < paginator.totalPages - 1 && <li className="page-item disabled"><span className="page-link">...</span></li>}
+                                    <li className="page-item" onClick={(event) => handlePages(event, paginator.totalPages)}>
+                                        <a className="page-link" href=".">{paginator.totalPages}</a>
+                                    </li>
+                                </>
+                            )}
+
+
                             {paginator.hasNextPage &&
                                 <li className="page-item fixedSize" onClick={(event) => handlePages(event, paginator.nextPage)}>
                                     <a className="page-link" href=".">
