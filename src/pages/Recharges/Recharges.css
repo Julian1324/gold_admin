@@ -1,0 +1,10 @@
+@media only screen and (max-width: 500px) {
+    .card-body {
+        margin-left: 1rem !important;
+        width: 95% !important;
+    }
+}
+
+.card-body{
+    box-shadow: 0px 0px 20px rgba(1, 41, 112, 0.1);
+}
