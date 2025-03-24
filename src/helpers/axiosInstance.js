@@ -9,9 +9,11 @@ axiosInstance.interceptors.request.use(
     async (req) => {
         // const response = await axios.get('https://api.ipify.org/?format=json');
         // req.headers.ip = response.data.ip;
-        return req;
+    return req;
     },
-    (err) => err
+    (err) => {
+        return Promise.reject(err);
+    }
 );
 
 // axiosInstance.interceptors.response.use(

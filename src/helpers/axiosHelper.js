@@ -4,7 +4,7 @@ import axiosInstance from "./axiosInstance";
 export const signInUser = async ({ email, password }) => {
     try {
         const response = await axiosInstance.post(
-            `${constants.API_URL + constants.USER_SIGNIN}`,
+            `${constants.USER_SIGNIN}`,
             { email, password }
         );
         if (response.status === 200) return {
@@ -32,18 +32,94 @@ export const getUser = async ({ headers }) => {
     }
 }
 
-export const getCategories = async () => {
+export const getCategories = async ({ page, limit, headers } = {}) => {
     try {
-        const response = await axiosInstance.get(
-            `${constants.API_URL + constants.GET_CATEGORIES}`
-        );
+        const url = page && limit
+            ? `${constants.GET_CATEGORIES}?page=${page}&limit=${limit}`
+            : constants.GET_CATEGORIES;
+        const response = await axiosInstance.get(url, { headers });
         if (response.status === 200) return {
             data: response.data,
+        };
+    } catch (error) {
+        throw error;
+    }
+};
+
+export const createCategory = async (categoryDTO, headers) => {
+    try {
+        const response = await axiosInstance.post(
+            constants.GET_CATEGORY,
+            categoryDTO,
+            { headers }
+        );
+        if (response.status === 200 && response.data) {
+            return {
+                data: response.data,
+                loadingReq: false,
+                alertModalShow: true
+            };
+        } else {
+            throw new Error("La respuesta del servidor no es válida");
+        }
+    } catch (error) {
+        if (error.response) {
+            console.log(error.response)
+            throw new Error('Error en la solicitud: ' + error.response.data);
+        } else if (error.request) {
+            throw new Error("No se recibió respuesta del servidor");
+        } else {
+            throw new Error(`Error en la solicitud: ${error.message}`);
+        }
+    }
+};
+export const updateCategory = async (categoryDTO, headers) => {
+    try {
+        const response = await axiosInstance.put(
+            constants.GET_CATEGORY, categoryDTO,
+            { headers }
+        );
+        if (response.status === 200) {
+            return {
+                data: response.data,
+                loadingReq: false,
+                alertModalShow: true
+            };
         }
     } catch (error) {
         throw error;
     }
 }
+export const deleteCategory = async (id, headers) => {
+    try {
+        const response = await axiosInstance.delete(
+            `${constants.DELETE_CATEGORY}/${id}`,
+            { headers }
+        );
+
+        if (response.status === 200) {
+            return {
+                success: true,
+                message: constants.CATEGORY_DELETED,
+                data: response.data,
+            };
+        } else {
+            throw new Error("La respuesta del servidor no es válida");
+        }
+    } catch (error) {
+        if (error.response) {
+            if (error.response.status === 400 && error.response.data.message === constants.CATEGORY_HAS_PRODUCTS) {
+                throw new Error(constants.CATEGORY_HAS_PRODUCTS);
+            } else {
+                throw new Error(error.response.data.message || constants.MODAL_BODY_ERROR);
+            }
+        } else if (error.request) {
+            throw new Error("No se recibió respuesta del servidor");
+        } else {
+            throw new Error(`Error en la solicitud: ${error.message}`);
+        }
+    }
+};
 
 export const getProduct = async ({ _id }) => {
     try {

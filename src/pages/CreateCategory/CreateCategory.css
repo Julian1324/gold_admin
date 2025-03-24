@@ -1,0 +1,118 @@
+.create-category {
+    padding: 20px;
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+  }
+  
+  .create-category h1 {
+    margin-bottom: 20px;
+    color: #333;
+  }
+  
+  .form-container {
+    margin-bottom: 30px;
+  }
+  
+  .form-container .form-group {
+    margin-bottom: 15px;
+  }
+  
+  .form-container .form-control {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+  }
+  
+  .form-container .btn {
+    padding: 10px 20px;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  
+  .form-container .btn-primary {
+    background-color: #007bff;
+    color: white;
+    border: none;
+  }
+  
+  .form-container .btn-primary:hover {
+    background-color: #0056b3;
+  }
+  
+  .table-container {
+    margin-top: 20px;
+  }
+  
+  .table-container h2 {
+    margin-bottom: 15px;
+    color: #333;
+  }
+  
+  .table-container table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  
+  .table-container th,
+  .table-container td {
+    padding: 10px;
+    border: 1px solid #ddd;
+    text-align: left;
+  }
+  
+  .table-container th {
+    background-color: #f8f9fa;
+  }
+  
+  .table-container tr:hover {
+    background-color: #f1f1f1;
+  }
+  
+  .table-container .btn {
+    margin-right: 5px;
+  }
+  
+  .table-container .btn-warning {
+    background-color: #ffc107;
+    color: black;
+    border: none;
+  }
+  
+  .table-container .btn-warning:hover {
+    background-color: #e0a800;
+  }
+  
+  .table-container .btn-danger {
+    background-color: #dc3545;
+    color: white;
+    border: none;
+  }
+  
+  .table-container .btn-danger:hover {
+    background-color: #c82333;
+  }
+
+  /* Estilos para la tabla */
+.table-container {
+  overflow-x: auto; /* Hace que la tabla sea responsive */
+}
+
+.table th,
+.table td {
+  white-space: nowrap; /* Evita que el texto se divida en varias líneas */
+}
+
+.description-cell {
+  max-width: 200px; /* Limita el ancho de la columna de descripción */
+  overflow: hidden;
+  text-overflow: ellipsis; /* Muestra puntos suspensivos si el texto es muy largo */
+}
+
+.actions-cell {
+  display: flex;
+  justify-content: flex-end; /* Alinea los botones a la derecha */
+  gap: 8px; /* Espacio entre los botones */
+}
+  

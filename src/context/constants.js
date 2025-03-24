@@ -41,7 +41,22 @@ const USER_OPTIONS = {
     admin: { recharges: true, accounts: true },
     superadmin: { services: true, recharges: true, accounts: true }
 };
+const CATEGORY_STATUSES = { true: 'Activa', false: 'Inactiva', undefined: 'No disponible' };
 const KEY_STORAGE_BASE = 'GLDST0';
+const GET_CATEGORY = '/category';
+const DELETE_CATEGORY = '/category';
+const GET_ACTIVE_CATEGORIES = '/categories/active'
+const MODAL_CONFIRM_CREATION = "¿Estás seguro de que deseas crear esta categoría?";
+const MODAL_CONFIRM_CREATE_CATEGORY = "Esta acción agregará una nueva categoría a la lista.";
+const CATEGORY_UPDATED = "La categoría ha sido actualizada correctamente.";
+const MODAL_TITLE_DELETE = "Eliminar categoría";
+const MODAL_BODY_DELETE = "¿Estás seguro de que deseas eliminar esta categoría?";
+const MODAL_TILE_DELETE_SUCCESS = "¡Categoría eliminada exitosamente!";
+const CATEGORY_DELETED_SUCCESSFULLY = "La categoría ha sido eliminada correctamente.";
+const CATEGORY_HAS_PRODUCTS = "No se puede eliminar la categoría porque tiene productos asociados.";
+const MODAL_BODY_ERROR = "Ha ocurrido un error inesperado.";
+const CATEGORY_NOT_AVAILABLE = "Categoria en estado inactivo, no disponible para su uso.";
+const CATEGORY_CREATED_SUCCESSFULLY = "La categoría ha sido creada exitosamente.";
 
 export const constants = Object.freeze({
     API_URL,
@@ -84,5 +99,20 @@ export const constants = Object.freeze({
     USER_RECHARGE_SUCCESSFULL,
     MAX_VISIBLE_PAGES,
     USER_OPTIONS,
-    KEY_STORAGE_BASE
+    KEY_STORAGE_BASE,
+    MODAL_CONFIRM_CREATION,
+    MODAL_CONFIRM_CREATE_CATEGORY,
+    CATEGORY_UPDATED,
+    MODAL_TITLE_DELETE,
+    MODAL_BODY_DELETE,
+    MODAL_TILE_DELETE_SUCCESS,
+    CATEGORY_DELETED_SUCCESSFULLY,
+    CATEGORY_HAS_PRODUCTS,
+    MODAL_BODY_ERROR,
+    GET_CATEGORY,
+    DELETE_CATEGORY,
+    GET_ACTIVE_CATEGORIES,
+    CATEGORY_NOT_AVAILABLE,
+    CATEGORY_CREATED_SUCCESSFULLY,
+    CATEGORY_STATUSES
 });

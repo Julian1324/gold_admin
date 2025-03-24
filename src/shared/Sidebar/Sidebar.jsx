@@ -24,11 +24,19 @@ function Sidebar() {
             <span>Recargar saldo</span>
           </NavLink>
         </li>
-        
+
         <li className="nav-item">
           <NavLink to={"/accounts"} className={`nav-link ${(location.pathname === "/accounts") ? "active" : "collapsed"}`}>
             <i className="bi bi-grid"></i>
             <span>Crear cuentas</span>
+          </NavLink>
+        </li>
+
+         {/* Nuevo enlace para "Crear Categoría"  */}
+        <li className="nav-item">
+          <NavLink to={"/create-category"} className={`nav-link ${(location.pathname === "/create-category") ? "active" : "collapsed"}`}>
+            <i className="bi bi-grid"></i>
+            <span>Crear categoría</span>
           </NavLink>
         </li>
 

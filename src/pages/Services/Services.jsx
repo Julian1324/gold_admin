@@ -4,16 +4,17 @@ import { getCategorySlice, getUserSlice } from '../../context/store/store';
 import { useForm } from 'react-hook-form';
 import { AlertModal } from '../../shared/Modal/AlertModal';
 import { constants } from "../../context/constants";
-import { createProduct, getAllProducts, updateProduct } from "../../helpers/axiosHelper";
+import { createProduct, getAllProducts, getCategories as getCategoriesAxios, updateProduct } from "../../helpers/axiosHelper";
 import { useNavigate } from 'react-router-dom';
 import Spinner from 'react-bootstrap/Spinner';
 import { Table, Button, Modal, Form } from 'react-bootstrap';
 import ConfirmModal from "../../../../gold_admin/src/shared/Modal/ConfirmModal";
 
 const Services = () => {
+
     const navigator = useNavigate();
     const [margin, setMargin] = useState({});
-    const { categories } = getCategorySlice();
+    const { getCategories, updateCategories } = getCategorySlice();
     const { headers, getUserOptions } = getUserSlice();
     const [alertModalShow, setAlertModalShow] = useState(false);
     const [messagesToModal, setMessagesToModal] = useState({ title: '', body: '' });
@@ -40,6 +41,22 @@ const Services = () => {
     } = useForm();
 
     useEffect(() => {
+
+        const fetchCategories = async () => {
+            try {
+                const response = await getCategoriesAxios({ headers });
+                if (response && Array.isArray(response.data)) { // Verifica que sea un array
+                    updateCategories(response.data); // Actualiza el estado global
+                } else {
+                    console.error("se esperaba un array pero envió:", response);
+                }
+            } catch (error) {
+                console.error("Error fetching active categories:", error);
+            }
+        };
+
+        fetchCategories();
+
         const uOptions = getUserOptions();
         if (!uOptions.services) return navigator(`../${Object.keys(uOptions)[0]}`);
         const marginLeft = document.querySelector('.sidebar').clientWidth;
@@ -64,8 +81,8 @@ const Services = () => {
             });
         }
         getProducts();
-    }, [headers, getUserOptions, navigator]);
-
+    }, [headers, getUserOptions, navigator, updateCategories]);
+    const categories = getCategories() || []; // Si es undefined, usa un array vacío
     const onSubmit = async (form) => {
         const productDTO = {
             ...form,
@@ -88,7 +105,11 @@ const Services = () => {
         }
     }
 
-    const getCategoryName = (category_id) => categories.find((category) => category._id === category_id).name;
+    const getCategoryName = (category_id) => {
+        const categories = getCategories() || [];
+        const category = categories.find((category) => category._id === category_id);
+        return category ? category.name : "No disponible";
+    };
 
     const handleEditClick = (row) => {
         setCurrentRow(row);
@@ -197,12 +218,14 @@ const Services = () => {
                             className={`form-select ${errors.category_id ? 'is-invalid' : ''}`}
                             {...register('category_id', { required: 'Selecciona una categoría' })}
                         >
-                            <option value="">Selecciona</option>
-                            {categories.map((category) =>
-                                <option value={category._id} key={category._id}>
-                                    {category.name}
-                                </option>
-                            )}
+                            <option key="default" value="">Selecciona</option>
+                            {categories
+                                .filter((category) => category.status)
+                                .map((category, index) => (
+                                    <option key={category._id || `category-${index}`} value={category._id}>
+                                        {category.name}
+                                    </option>
+                                ))}
                         </select>
                         {errors.category_id && <span className="text-danger">{errors.category_id.message}</span>}
                     </div>
@@ -298,26 +321,24 @@ const Services = () => {
                             <th>Nombre</th>
                             <th>Precio</th>
                             <th>Descuento</th>
+                            <th>Estado de la categoría</th>
                             <th>Acciones</th>
                         </tr>
                     </thead>
                     <tbody>
-                        {products.map((product, productIndex) => (
-                            <tr key={productIndex}>
-                                <td>{getCategoryName(product.category_id)}</td>
-                                <td>{product.name}</td>
-                                <td>{product.price}</td>
-                                <td>{product.discount}%</td>
-                                <td>
-                                    <Button
-                                        variant="warning"
-                                        onClick={() => handleEditClick(product)}
-                                    >
-                                        Editar
-                                    </Button>
-                                </td>
-                            </tr>
-                        ))}
+                        {products.map((product) => {
+                            const category = getCategories().find((cat) => cat._id === product.category_id);
+                            return (
+                                <tr key={product._id}>
+                                    <td>{getCategoryName(product.category_id)}</td>
+                                    <td>{product.name}</td>
+                                    <td>{product.price}</td>
+                                    <td>{product.discount}%</td>
+                                    <td>{constants.CATEGORY_STATUSES[category?.status]}</td>
+                                    <td><Button variant="warning" onClick={() => handleEditClick(product)}>Editar</Button></td>
+                                </tr>
+                            );
+                        })}
                     </tbody>
                 </Table>
                 <div className="d-flex justify-content-center">
