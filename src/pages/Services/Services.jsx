@@ -302,7 +302,7 @@ const Services = () => {
 
             </div>
             <div
-                className="mt-3"
+                className="mt-3 contResponsive"
                 style={
                     {
                         marginLeft: (margin.marginLeft ? margin.marginLeft : 0) + 30,
@@ -314,7 +314,7 @@ const Services = () => {
                     }
                 }
             >
-                <Table bordered hover>
+                <Table bordered hover className="tableResponsive">
                     <thead>
                         <tr>
                             <th>Categoria</th>

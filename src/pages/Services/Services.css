@@ -1,10 +1,23 @@
 @media only screen and (max-width: 500px) {
     .card-body {
-        margin-left: 1rem !important;
+        margin-left: 0.5rem !important;
         width: 95% !important;
+    }
+
+    .contResponsive {
+        margin-left: 0 !important;
+        width: 100% !important;
+        overflow-x: unset; /* Permite que la tabla haga scroll sin esconder contenido */
+    }
+    
+    .tableResponsive {
+        overflow-x: auto !important; /* Permite el scroll horizontal */
+        white-space: nowrap;
+        display: block; /* Evita que la tabla expanda el contenedor */
+        max-width: 100%; /* Asegura que no se desborde fuera del contenedor */
     }
 }
 
-.card-body{
+.card-body {
     box-shadow: 0px 0px 20px rgba(1, 41, 112, 0.1);
 }

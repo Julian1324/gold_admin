@@ -10,6 +10,7 @@ import { AlertModal } from "../../shared/Modal/AlertModal";
 import { useNavigate } from 'react-router-dom';
 import { Table, Button, Modal, Form } from 'react-bootstrap';
 import { timeFormatter } from "../../helpers/timeZoneHelper";
+import './Accounts.css';
 
 const Accounts = () => {
     const navigator = useNavigate();
@@ -346,7 +347,7 @@ const Accounts = () => {
 
             </div>
             <div
-                className="mt-3"
+                className="mt-3 contResponsive"
                 style={
                     {
                         marginLeft: (margin.marginLeft ? margin.marginLeft : 0) + 30,
@@ -358,7 +359,7 @@ const Accounts = () => {
                     }
                 }
             >
-                <Table bordered hover>
+                <Table bordered hover className="tableResponsive">
                     <thead>
                         <tr>
                             <th>Fecha</th>
