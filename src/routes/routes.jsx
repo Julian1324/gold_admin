@@ -14,7 +14,7 @@ const routes = [
     { path: '/services', component: Services },
     { path: '/recharges', component: Recharges },
     { path: '/accounts', component: Accounts },
-    { path: '/create-category', component: CreateCategory }
+    { path: '/categories', component: CreateCategory }
 ];
   
 export default routes;

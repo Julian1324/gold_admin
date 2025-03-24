@@ -40,7 +40,7 @@ const USER_RECHARGE_SUCCESSFULL = '¡Recarga realizada exitosamente!';
 const MAX_VISIBLE_PAGES = 5;
 const USER_OPTIONS = {
     admin: { recharges: true, accounts: true },
-    superadmin: { services: true, recharges: true, accounts: true }
+    superadmin: { services: true, recharges: true, accounts: true, categories: true }
 };
 const CATEGORY_STATUSES = { true: 'Activa', false: 'Inactiva', undefined: 'No disponible' };
 const KEY_STORAGE_BASE = 'GLDST0';

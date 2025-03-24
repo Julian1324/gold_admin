@@ -14,7 +14,7 @@ const CreateCategory = () => {
   const [categories, setCategories] = useState([]);
   const navigator = useNavigate();
   const [showEditModal, setShowEditModal] = useState(false);
-  const { headers } = getUserSlice();
+  const { headers, getUserOptions } = getUserSlice();
   const [currentCategory, setCurrentCategory] = useState(null);
   const [loading, setLoading] = useState(false);
   const [margin, setMargin] = useState({ marginLeft: 0, marginTop: 0 });
@@ -94,8 +94,11 @@ const CreateCategory = () => {
     const headerHeight = document.querySelector(".header")?.clientHeight || 0;
     setMargin({ marginLeft: sidebarWidth + 1, marginTop: headerHeight + 1 });
 
+    const uOptions = getUserOptions();
+    if (!uOptions.services) return navigator(`../${Object.keys(uOptions)[0]}`);
+
     fetchPaginatedCategories(paginator.page, paginator.limit);
-  }, [paginator.page, paginator.limit, fetchPaginatedCategories]);
+  }, [paginator.page, paginator.limit, getUserOptions, navigator, fetchPaginatedCategories]);
 
 
   const handlePageChange = (event, newPage) => {

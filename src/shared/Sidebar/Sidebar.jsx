@@ -32,13 +32,12 @@ function Sidebar() {
           </NavLink>
         </li>
 
-         {/* Nuevo enlace para "Crear Categoría"  */}
-        <li className="nav-item">
-          <NavLink to={"/create-category"} className={`nav-link ${(location.pathname === "/create-category") ? "active" : "collapsed"}`}>
+        {getUserOptions().categories && <li className="nav-item">
+          <NavLink to={"/categories"} className={`nav-link ${(location.pathname === "/categories") ? "active" : "collapsed"}`}>
             <i className="bi bi-grid"></i>
             <span>Crear categoría</span>
           </NavLink>
-        </li>
+        </li>}
 
       </ul>
 
