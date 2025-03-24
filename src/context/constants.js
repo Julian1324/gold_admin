@@ -19,6 +19,7 @@ const UPDATE_ACCOUNT = '/updateAccount';
 const ACCOUNT_CREATED = '\u00A1Cuenta creada exitosamente!';
 const UPDATED_ACCOUNT = '\u00A1Cuenta actualizada exitosamente!';
 const ACCOUNT_STATUS = { true: 'Activo', false: 'Inactivo' };
+const CATEGORY_STATUS = { ...ACCOUNT_STATUS };
 const QUERY_PRODUCTS = '/queryProducts';
 const MODAL_TITLE_SUCCCESS = '\u00A1Se ha realizado con \u00E9xito!';
 const MODAL_TITLE_ERROR = '\u00A1Oops, error en la solicitud!';
@@ -80,6 +81,7 @@ export const constants = Object.freeze({
     ACCOUNT_CREATED,
     UPDATED_ACCOUNT,
     ACCOUNT_STATUS,
+    CATEGORY_STATUS,
     QUERY_PRODUCTS,
     MODAL_TITLE_SUCCCESS,
     MODAL_TITLE_ERROR,

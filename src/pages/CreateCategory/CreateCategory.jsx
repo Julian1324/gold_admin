@@ -386,28 +386,23 @@ const CreateCategory = () => {
               </tr>
             </thead>
             <tbody>
-              {categories.map((category, index) => (
-                <tr key={category._id || index}> {/* Usa category._id como key si está disponible */}
-                  <td>{category.name}</td>
-                  <td>{category.description}</td>
-                  <td>{category.status ? "Activo" : "Inactivo"}</td>
-                  <td>
-                    <Button
-                      variant="warning"
-                      onClick={() => handleEdit(category)}
-                      className="me-2"
-                    >
-                      Editar
-                    </Button>
-                    <Button
-                      variant="danger"
-                      onClick={() => handleDelete(category._id)}
-                    >
-                      Eliminar
-                    </Button>
-                  </td>
+              {categories && categories.length > 0 ? (
+                categories.map((category, index) => (
+                  <tr key={category._id || index}>
+                    <td>{category.name}</td>
+                    <td>{category.description}</td>
+                    <td>{constants.CATEGORY_STATUS[category.status]}</td>
+                    <td>
+                      <Button variant="warning" onClick={() => handleEdit(category)} className="me-2">Editar</Button>
+                      <Button variant="danger" onClick={() => handleDelete(category._id)}>Eliminar</Button>
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan="4" className="text-center">No hay categorías disponibles</td>
                 </tr>
-              ))}
+              )}
             </tbody>
           </Table>
         </div>
