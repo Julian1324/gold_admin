@@ -7,6 +7,7 @@ import { AlertModal } from '../../shared/Modal/AlertModal';
 import { constants } from '../../context/constants';
 import { useNavigate } from 'react-router-dom';
 import { getCategories } from '../../helpers/axiosHelper';
+import Sidebar from '../Sidebar/Sidebar';
 
 function MyNavbar() {
     const navigator = useNavigate();
@@ -14,6 +15,11 @@ function MyNavbar() {
     const { updateCategories } = getCategorySlice();
     const [alertModalShow, setAlertModalShow] = useState(false);
     const [messagesToModal, setMessagesToModal] = useState({ title: '', body: '' });
+    const [openSidebarMobile, setOpenSidebarMobile] = useState(false);
+
+    const toggleSidebar = () => {
+        setOpenSidebarMobile(!openSidebarMobile);
+    };
 
     useEffect(() => {
         if (!Object.keys(headers).length) {
@@ -22,14 +28,16 @@ function MyNavbar() {
             setAlertModalShow(true);
         } else {
             const getMyCategories = async () => {
-                if (window.innerWidth < constants.WIDTH_MOBILE) setMobileDevice(true);
+                const isMobile = window.innerWidth < constants.WIDTH_MOBILE;
+                setMobileDevice(isMobile);
+                setOpenSidebarMobile(isMobile && openSidebarMobile);
 
                 const response = await getCategories();
                 updateCategories(response.data);
             }
             getMyCategories();
         }
-    }, [headers, setMobileDevice, updateCategories]);
+    }, [headers, setMobileDevice, updateCategories, openSidebarMobile]);
 
     const onCloseModal = () => {
         setAlertModalShow(false);
@@ -51,7 +59,8 @@ function MyNavbar() {
                         <Image src={assets['goldServiceLogo']} alt="" className="me-2" style={{ width: '5rem' }} />
                         <span className="d-none d-lg-block">Gold Admin</span>
                     </Navbar.Brand>
-                    <i className="bi bi-list toggle-sidebar-btn"></i>
+                    <i className="bi bi-list toggle-sidebar-btn" onClick={() => toggleSidebar()}></i>
+                    {openSidebarMobile && <Sidebar openSidebarMobile={openSidebarMobile} />}
                     <Navbar.Collapse id="navbar-nav">
                         <Form className="d-flex search-bar ms-auto" action="." method="POST">
                             <FormControl

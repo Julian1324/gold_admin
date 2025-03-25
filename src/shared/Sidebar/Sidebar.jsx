@@ -2,12 +2,19 @@ import './Sidebar.css';
 import { useLocation, NavLink } from 'react-router-dom';
 import { getUserSlice } from '../../context/store/store';
 
-function Sidebar() {
+function Sidebar({ openSidebarMobile }) {
   const location = useLocation();
-  const { getUserOptions } = getUserSlice();
+  const { getUserOptions, getMobileDevice } = getUserSlice();
 
   return (
-    <aside id="sidebar" className="sidebar">
+    <aside
+      id="sidebar"
+      className="sidebar"
+      style={{
+        left: getMobileDevice() ? (openSidebarMobile ? '0' : '-300px') : '0',
+        top: getMobileDevice() ? '0' : '60px'
+      }}
+    >
 
       <ul className="sidebar-nav" id="sidebar-nav">
 
