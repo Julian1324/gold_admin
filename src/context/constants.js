@@ -16,6 +16,7 @@ const GET_PRODUCTS = '/getProducts';
 const GET_ACCOUNTS = '/getAccountsPage';
 const CREATE_ACCOUNT = '/createAccount';
 const UPDATE_ACCOUNT = '/updateAccount';
+const UPLOAD_IMAGE = '/uploadImage';
 const ACCOUNT_CREATED = '\u00A1Cuenta creada exitosamente!';
 const UPDATED_ACCOUNT = '\u00A1Cuenta actualizada exitosamente!';
 const ACCOUNT_STATUS = { true: 'Activo', false: 'Inactivo' };
@@ -82,6 +83,7 @@ export const constants = Object.freeze({
     UPDATED_ACCOUNT,
     ACCOUNT_STATUS,
     CATEGORY_STATUS,
+    UPLOAD_IMAGE,
     QUERY_PRODUCTS,
     MODAL_TITLE_SUCCCESS,
     MODAL_TITLE_ERROR,

@@ -4,11 +4,12 @@ import { getCategorySlice, getUserSlice } from '../../context/store/store';
 import { useForm } from 'react-hook-form';
 import { AlertModal } from '../../shared/Modal/AlertModal';
 import { constants } from "../../context/constants";
-import { createProduct, getAllProducts, getCategories as getCategoriesAxios, updateProduct } from "../../helpers/axiosHelper";
+import { createProduct, getAllProducts, getCategories as getCategoriesAxios, updateProduct, uploadImage } from "../../helpers/axiosHelper";
 import { useNavigate } from 'react-router-dom';
 import Spinner from 'react-bootstrap/Spinner';
 import { Table, Button, Modal, Form } from 'react-bootstrap';
 import ConfirmModal from "../../../../gold_admin/src/shared/Modal/ConfirmModal";
+import { useRef } from "react";
 
 const Services = () => {
 
@@ -29,6 +30,14 @@ const Services = () => {
     const [productDTO, setProductDTO] = useState({});
     const [errorDiscount, setErrorDiscount] = useState('');
     const [errorPrice, setErrorPrice] = useState('');
+    const [previewUrl, setPreviewUrl] = useState('');
+    const [modalPreviewUrl, setModalPreviewUrl] = useState('');
+    const [selectedFile, setSelectedFile] = useState(null);
+    const [selectedModalFile, setSelectedModalFile] = useState(null);
+    const [selectedFileName, setSelectedFileName] = useState('');
+    const [selectedModalFileName, setSelectedModalFileName] = useState('');
+    const fileInputRef = useRef(null);
+    const modalFileInputRef = useRef(null);
     const startPage = Math.max(1, paginator.page - Math.floor(constants.MAX_VISIBLE_PAGES / 2));
     const endPage = Math.min(paginator.totalPages, startPage + constants.MAX_VISIBLE_PAGES - 1);
     const pages = Array.from({ length: endPage - startPage + 1 }, (_, i) => startPage + i);
@@ -37,8 +46,14 @@ const Services = () => {
         register,
         handleSubmit,
         reset,
+        setValue,
+        setError,
+        clearErrors,
+        watch,
         formState: { errors }
     } = useForm();
+    const imageUrl = watch('imageUrl');
+    const imagePublicId = watch('imagePublicId');
 
     useEffect(() => {
 
@@ -84,12 +99,18 @@ const Services = () => {
     }, [headers, getUserOptions, navigator, updateCategories]);
     const categories = getCategories() || []; // Si es undefined, usa un array vacío
     const onSubmit = async (form) => {
+        if (!selectedFile && (!form.imageUrl || !form.imagePublicId)) {
+            setError('imageUrl', { type: 'manual', message: 'La imagen es obligatoria.' });
+            return;
+        }
         const productDTO = {
             ...form,
             discount: form.discount ? form.discount : 0,
             isEntire: !form.isEntire,
             quantity: 0,
-            status: true
+            status: true,
+            imageUrl: form.imageUrl,
+            imagePublicId: form.imagePublicId
         };
         setConfirmModalShow(true);
         setProductDTO(productDTO);
@@ -116,12 +137,28 @@ const Services = () => {
         setShowEditModal(true);
         setErrorDiscount('');
         setErrorPrice('');
+        setModalPreviewUrl(row.imageUrl || '');
     }
 
     const handleSave = async () => {
         try {
             setLoadingEdition(true);
-            const response = await updateProduct(currentRow, headers);
+
+            let payload = { ...currentRow };
+
+            if (selectedModalFile) {
+                const responseUpload = await uploadImage(selectedModalFile, headers);
+                payload = {
+                    ...payload,
+                    imageUrl: responseUpload.data.url,
+                    imagePublicId: responseUpload.data.publicId
+                };
+                setSelectedModalFile(null);
+                setSelectedModalFileName('');
+                if (modalFileInputRef.current) modalFileInputRef.current.value = '';
+            }
+
+            const response = await updateProduct(payload, headers);
             const updatedData = products.map((product) =>
                 product._id === response.data._id ? response.data : product
             );
@@ -167,16 +204,47 @@ const Services = () => {
         }));
     }
 
+    const onResetForm = () => {
+        reset();
+        setPreviewUrl('');
+        setValue('imageUrl', '');
+        setValue('imagePublicId', '');
+        setSelectedFileName('');
+        if (fileInputRef.current) fileInputRef.current.value = '';
+    }
+
     const onConfirm = async () => {
         try {
             setLoadingEdition(true);
             setLoadingServices(true);
-            const response = await createProduct(productDTO, headers);
+            let payload = { ...productDTO };
+
+            if (selectedFile) {
+                const responseUpload = await uploadImage(selectedFile, headers);
+                payload = {
+                    ...payload,
+                    imageUrl: responseUpload.data.url,
+                    imagePublicId: responseUpload.data.publicId
+                };
+                setSelectedFile(null);
+                setSelectedFileName('');
+                if (fileInputRef.current) fileInputRef.current.value = '';
+            }
+
+            if (!payload.imageUrl || !payload.imagePublicId) {
+                setLoadingEdition(false);
+                setLoadingServices(false);
+                setAlertModalShow(true);
+                setMessagesToModal({ title: constants.MODAL_TITLE_ERROR, body: 'Selecciona una imagen y súbela.' });
+                return;
+            }
+
+            const response = await createProduct(payload, headers);
             setLoadingServices(response.loadingReq);
 
             const newProduct = {
                 ...response.data,
-                category_id: productDTO.category_id
+                category_id: payload.category_id
             };
 
             setProducts([newProduct, ...products]);
@@ -272,12 +340,45 @@ const Services = () => {
                         {errors.discount && <span className="text-danger">{errors.discount.message}</span>}
                     </div>
                     <div className="col-md-8">
-                        <label htmlFor="description" className="form-label">Descripción</label>
+                        <label className="form-label">Imagen del servicio</label>
+                        <div className="d-flex align-items-start gap-3 border rounded p-2 bg-light">
+                            <div className="flex-grow-1">
+                                <div className="d-flex align-items-center gap-2">
+                            <input
+                                type="file"
+                                className="form-control"
+                                ref={fileInputRef}
+                                accept="image/png, image/jpeg, image/webp"
+                                onChange={(e) => {
+                                    const name = e.target.files?.[0]?.name || '';
+                                    const file = e.target.files?.[0] || null;
+                                    setSelectedFile(file);
+                                    setPreviewUrl(file ? URL.createObjectURL(file) : '');
+                                    setSelectedFileName(name);
+                                    if (name) clearErrors('imageUrl');
+                                }}
+                            />
+                        </div>
+                        <small className="text-muted">Formatos: JPG, PNG o WEBP. Máximo 5MB.</small></div>
+                            {(previewUrl || imageUrl) &&
+                                <div className="d-flex flex-column align-items-center" style={{ width: '140px' }}>
+                                    <span className="text-muted small">Preview</span>
+                                    <div className="border rounded d-flex justify-content-center align-items-center bg-white" style={{ width: '120px', height: '120px' }}>
+                                        <img src={previewUrl || imageUrl} alt="preview" style={{ width: '100%', height: '100%', objectFit: 'cover' }} className="rounded" />
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                    <input type="hidden" {...register('imageUrl')} />
+                    <input type="hidden" {...register('imagePublicId')} />
+                    <div className="col-md-8">
+                        <label htmlFor="description" className="form-label">Descripcion</label>
                         <textarea
                             className={`form-control ${errors.description ? 'is-invalid' : ''}`}
                             id="description"
                             rows="2"
-                            {...register('description', { required: 'La descripción es obligatoria' })}
+                            {...register('description', { required: 'La descripcion es obligatoria' })}
                         ></textarea>
                         {errors.description && <span className="text-danger">{errors.description.message}</span>}
                     </div>
@@ -292,7 +393,7 @@ const Services = () => {
                         <label htmlFor="isEntire" className="form-check-label">Venta por perfiles</label>
                     </div>
                     <div className="text-center">
-                        <button type="reset" className="btn btn-secondary me-2" onClick={() => reset()}>Limpiar</button>
+                        <button type="reset" className="btn btn-secondary me-2" onClick={onResetForm}>Limpiar</button>
                         <button type="submit" className="btn btn-primary" disabled={loadingServices} style={{ width: '10rem' }}>
                             Crear servicio
                             {loadingServices && <Spinner animation="border" role="status" size="sm" className='ms-2' />}
@@ -319,9 +420,10 @@ const Services = () => {
                         <tr>
                             <th>Categoria</th>
                             <th>Nombre</th>
+                            <th>Imagen</th>
                             <th>Precio</th>
                             <th>Descuento</th>
-                            <th>Estado de la categoría</th>
+                            <th>Estado de la categoria</th>
                             <th>Acciones</th>
                         </tr>
                     </thead>
@@ -332,6 +434,12 @@ const Services = () => {
                                 <tr key={product._id}>
                                     <td>{getCategoryName(product.category_id)}</td>
                                     <td>{product.name}</td>
+                                    <td className="text-center align-middle">
+                                        {product.imageUrl
+                                            ? <img src={product.imageUrl} alt={product.name} style={{ width: '60px', height: '60px', objectFit: 'cover' }} className="rounded" />
+                                            : <span className="text-muted">-</span>
+                                        }
+                                    </td>
                                     <td>{product.price}</td>
                                     <td>{product.discount}%</td>
                                     <td>{constants.CATEGORY_STATUSES[category?.status]}</td>
@@ -441,6 +549,35 @@ const Services = () => {
                                 />
                                 {errorDiscount && <span className="text-danger">{errorDiscount}</span>}
                             </Form.Group>
+                            <Form.Group controlId="formImageEdit">
+                                <Form.Label>Imagen</Form.Label>
+                                <div className="d-flex align-items-start gap-3 border rounded p-2 bg-light">
+                                    <div className="flex-grow-1">
+                                        <Form.Control
+                                            type="file"
+                                            ref={modalFileInputRef}
+                                    accept="image/png, image/jpeg, image/webp"
+                                    onChange={(e) => {
+                                        const name = e.target.files?.[0]?.name || '';
+                                        const file = e.target.files?.[0] || null;
+                                        setSelectedModalFile(file);
+                                        setModalPreviewUrl(file ? URL.createObjectURL(file) : currentRow.imageUrl);
+                                        setSelectedModalFileName(name);
+                                    }}
+                                />
+                                    <small className="text-muted ms-1">Selecciona un archivo para previsualizar. Se subirá al guardar.</small>
+                                    </div>
+                                    <div className="d-flex flex-column align-items-center" style={{ width: '140px' }}>
+                                        <span className="text-muted small">Preview</span>
+                                        <div className="border rounded d-flex justify-content-center align-items-center bg-white" style={{ width: '120px', height: '120px' }}>
+                                            {(modalPreviewUrl || currentRow.imageUrl)
+                                                ? <img src={modalPreviewUrl || currentRow.imageUrl} alt="preview" style={{ width: '100%', height: '100%', objectFit: 'cover' }} className="rounded" />
+                                                : null
+                                            }
+                                        </div>
+                                    </div>
+                                </div>
+                            </Form.Group>
                             <Form.Group controlId="formDiscount">
                                 <Form.Label>Descripcion</Form.Label>
                                 <Form.Control
@@ -488,3 +625,16 @@ const Services = () => {
 }
 
 export default Services;
+
+
+
+
+
+
+
+
+
+
+
+
+

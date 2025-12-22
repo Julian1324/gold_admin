@@ -1,5 +1,6 @@
 import { constants } from "../context/constants";
 import axiosInstance from "./axiosInstance";
+import axios from "axios";
 
 export const signInUser = async ({ email, password }) => {
     try {
@@ -315,6 +316,31 @@ export const updateAccount = async ({ headers, _id, productID, email, password, 
         if (response.status === 200) return {
             data: response.data,
             loadingReq: false,
+        }
+    } catch (error) {
+        throw error;
+    }
+}
+
+export const uploadImage = async (file, headers) => {
+    try {
+        const formData = new FormData();
+        formData.append('image', file);
+
+        const response = await axios.post(
+            `${constants.API_URL + constants.UPLOAD_IMAGE}`,
+            formData,
+            {
+                headers: {
+                    ...headers,
+                    'Content-Type': 'multipart/form-data'
+                }
+            }
+        );
+        if (response.status === 200) return {
+            data: response.data,
+            loadingReq: false,
+            alertModalShow: true
         }
     } catch (error) {
         throw error;
