@@ -308,9 +308,8 @@ const Accounts = () => {
                                 <input
                                     type="checkbox"
                                     className="form-check-input me-1"
-                                    defaultChecked
-                                    onChange={(e) => setProfiles({ ...profiles, [key]: { ...value, status: e.target.value } })}
-                                    value={value.status}
+                                    checked={!!value.status}
+                                    onChange={(e) => setProfiles({ ...profiles, [key]: { ...value, status: e.target.checked } })}
                                 />
                                 <label htmlFor="status" className="form-check-label">Activo</label>
                             </div>
