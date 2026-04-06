@@ -322,6 +322,23 @@ export const updateAccount = async ({ headers, _id, productID, email, password, 
     }
 }
 
+export const deleteProduct = async ({ _id, headers, confirmHistorical = false }) => {
+    try {
+        const response = await axiosInstance.delete(
+            `${constants.API_URL + constants.CREATE_PRODUCT}/${_id}?confirmHistorical=${confirmHistorical}`,
+            { headers }
+        );
+
+        if (response.status === 200) return {
+            data: response.data,
+            loadingReq: false,
+            alertModalShow: true
+        };
+    } catch (error) {
+        throw error;
+    }
+}
+
 export const uploadImage = async (file, headers) => {
     try {
         const formData = new FormData();

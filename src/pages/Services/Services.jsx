@@ -4,7 +4,7 @@ import { getCategorySlice, getUserSlice } from '../../context/store/store';
 import { useForm } from 'react-hook-form';
 import { AlertModal } from '../../shared/Modal/AlertModal';
 import { constants } from "../../context/constants";
-import { createProduct, getAllProducts, getCategories as getCategoriesAxios, updateProduct, uploadImage } from "../../helpers/axiosHelper";
+import { createProduct, deleteProduct, getAllProducts, getCategories as getCategoriesAxios, updateProduct, uploadImage } from "../../helpers/axiosHelper";
 import { useNavigate } from 'react-router-dom';
 import Spinner from 'react-bootstrap/Spinner';
 import { Table, Button, Modal, Form } from 'react-bootstrap';
@@ -27,7 +27,10 @@ const Services = () => {
     const [paginator, setPaginator] = useState({});
     const [loadingPage, setLoadingPage] = useState({});
     const [confirmModalShow, setConfirmModalShow] = useState(false);
+    const [confirmDeleteModalShow, setConfirmDeleteModalShow] = useState(false);
+    const [confirmHistoricalDeleteModalShow, setConfirmHistoricalDeleteModalShow] = useState(false);
     const [productDTO, setProductDTO] = useState({});
+    const [productToDelete, setProductToDelete] = useState(null);
     const [errorDiscount, setErrorDiscount] = useState('');
     const [errorPrice, setErrorPrice] = useState('');
     const [previewUrl, setPreviewUrl] = useState('');
@@ -138,6 +141,43 @@ const Services = () => {
         setErrorDiscount('');
         setErrorPrice('');
         setModalPreviewUrl(row.imageUrl || '');
+    }
+
+    const handleDeleteClick = (row) => {
+        setProductToDelete(row);
+        setConfirmDeleteModalShow(true);
+    }
+
+    const executeDelete = async (confirmHistorical = false) => {
+        try {
+            if (!productToDelete) return;
+            setLoadingEdition(true);
+            const response = await deleteProduct({ _id: productToDelete._id, headers, confirmHistorical });
+            setProducts(products.filter((product) => product._id !== productToDelete._id));
+            setMessagesToModal({ title: constants.MODAL_TITLE_SUCCCESS, body: constants.PRODUCT_DELETED });
+            setAlertModalShow(response.alertModalShow);
+            setConfirmDeleteModalShow(false);
+            setConfirmHistoricalDeleteModalShow(false);
+            setProductToDelete(null);
+            setLoadingEdition(false);
+        } catch (error) {
+            const errorCode = error?.response?.data?.code;
+            const errorMessage = error?.response?.data?.message || error?.response?.data || constants.MODAL_BODY_ERROR;
+
+            if (errorCode === 'PRODUCT_HAS_MOVEMENTS') {
+                setConfirmDeleteModalShow(false);
+                setConfirmHistoricalDeleteModalShow(true);
+                setLoadingEdition(false);
+                return;
+            }
+
+            setMessagesToModal({ title: constants.MODAL_TITLE_ERROR, body: errorMessage });
+            setAlertModalShow(true);
+            setConfirmDeleteModalShow(false);
+            setConfirmHistoricalDeleteModalShow(false);
+            setProductToDelete(null);
+            setLoadingEdition(false);
+        }
     }
 
     const handleSave = async () => {
@@ -443,7 +483,14 @@ const Services = () => {
                                     <td>{product.price}</td>
                                     <td>{product.discount}%</td>
                                     <td>{constants.CATEGORY_STATUSES[category?.status]}</td>
-                                    <td><Button variant="warning" onClick={() => handleEditClick(product)}>Editar</Button></td>
+                                    <td>
+                                        <div className="d-flex gap-2">
+                                            <Button variant="warning" onClick={() => handleEditClick(product)}>Editar</Button>
+                                            <Button variant="danger" disabled={loadingEdition} onClick={() => handleDeleteClick(product)}>
+                                                Eliminar
+                                            </Button>
+                                        </div>
+                                    </td>
                                 </tr>
                             );
                         })}
@@ -609,6 +656,32 @@ const Services = () => {
                 size='md'
                 closeButton={0}
                 onConfirm={onConfirm}
+                loadingReq={loadingEdition}
+            />
+            <ConfirmModal
+                show={confirmDeleteModalShow}
+                onHide={() => {
+                    setConfirmDeleteModalShow(false);
+                    setProductToDelete(null);
+                }}
+                title={constants.MODAL_TITLE_DELETE_PRODUCT}
+                bodyText={constants.MODAL_BODY_DELETE_PRODUCT}
+                size='md'
+                closeButton={0}
+                onConfirm={() => executeDelete(false)}
+                loadingReq={loadingEdition}
+            />
+            <ConfirmModal
+                show={confirmHistoricalDeleteModalShow}
+                onHide={() => {
+                    setConfirmHistoricalDeleteModalShow(false);
+                    setProductToDelete(null);
+                }}
+                title={constants.MODAL_TITLE_DELETE_PRODUCT}
+                bodyText={constants.MODAL_BODY_DELETE_PRODUCT_WITH_MOVEMENTS}
+                size='md'
+                closeButton={0}
+                onConfirm={() => executeDelete(true)}
                 loadingReq={loadingEdition}
             />
             <AlertModal

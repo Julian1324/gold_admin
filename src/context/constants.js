@@ -9,6 +9,9 @@ const GET_PRODUCT_BY_ID = '/product';
 const CREATE_PRODUCT = '/product';
 const PRODUCT_CREATED = '\u00A1Servicio creado exitosamente!';
 const PRODUCT_UPDATED = '\u00A1Servicio actualizado exitosamente!';
+const PRODUCT_DELETED = '\u00A1Servicio eliminado exitosamente!';
+const PRODUCT_HAS_ACTIVE_ACCOUNTS = 'No se puede eliminar el servicio porque tiene cuentas activas.';
+const PRODUCT_HAS_MOVEMENTS = 'El servicio tiene movimientos históricos.';
 const GET_ALL_PRODUCTS = '/products';
 const GET_ALL_RECHARGES = '/rechargeMovements';
 const GET_THE_RECHARGER = '/getTheRecharger';
@@ -60,6 +63,10 @@ const MODAL_BODY_ERROR = "Ha ocurrido un error inesperado.";
 const CATEGORY_NOT_AVAILABLE = "Categoria en estado inactivo, no disponible para su uso.";
 const CATEGORY_CREATED_SUCCESSFULLY = "La categoría ha sido creada exitosamente.";
 
+const MODAL_TITLE_DELETE_PRODUCT = "Eliminar servicio";
+const MODAL_BODY_DELETE_PRODUCT = "¿Estás seguro de que deseas eliminar este servicio?";
+const MODAL_BODY_DELETE_PRODUCT_WITH_MOVEMENTS = "Este servicio tiene movimientos históricos. ¿Deseas eliminarlo de todas formas?";
+
 export const constants = Object.freeze({
     API_URL,
     USER_SIGNIN,
@@ -72,6 +79,9 @@ export const constants = Object.freeze({
     CREATE_PRODUCT,
     PRODUCT_CREATED,
     PRODUCT_UPDATED,
+    PRODUCT_DELETED,
+    PRODUCT_HAS_ACTIVE_ACCOUNTS,
+    PRODUCT_HAS_MOVEMENTS,
     GET_ALL_PRODUCTS,
     GET_ALL_RECHARGES,
     GET_THE_RECHARGER,
@@ -118,5 +128,8 @@ export const constants = Object.freeze({
     GET_ACTIVE_CATEGORIES,
     CATEGORY_NOT_AVAILABLE,
     CATEGORY_CREATED_SUCCESSFULLY,
-    CATEGORY_STATUSES
+    CATEGORY_STATUSES,
+    MODAL_TITLE_DELETE_PRODUCT,
+    MODAL_BODY_DELETE_PRODUCT,
+    MODAL_BODY_DELETE_PRODUCT_WITH_MOVEMENTS
 });
