@@ -1,15 +1,16 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import './Services.css';
 import { getCategorySlice, getUserSlice } from '../../context/store/store';
 import { useForm } from 'react-hook-form';
 import { AlertModal } from '../../shared/Modal/AlertModal';
 import { constants } from "../../context/constants";
-import { createProduct, deleteProduct, getAllProducts, getCategories as getCategoriesAxios, updateProduct, uploadImage } from "../../helpers/axiosHelper";
+import { createProduct, deleteProduct, getAllProducts, getCategories as getCategoriesAxios, restoreProduct, updateProduct, uploadImage } from "../../helpers/axiosHelper";
 import { useNavigate } from 'react-router-dom';
 import Spinner from 'react-bootstrap/Spinner';
 import { Table, Button, Modal, Form } from 'react-bootstrap';
 import ConfirmModal from "../../../../gold_admin/src/shared/Modal/ConfirmModal";
 import { useRef } from "react";
+import FilterChips from "../../shared/FilterChips/FilterChips";
 
 const Services = () => {
 
@@ -26,19 +27,20 @@ const Services = () => {
     const [currentRow, setCurrentRow] = useState(null);
     const [paginator, setPaginator] = useState({});
     const [loadingPage, setLoadingPage] = useState({});
+    const [activeFilter, setActiveFilter] = useState('all');
     const [confirmModalShow, setConfirmModalShow] = useState(false);
     const [confirmDeleteModalShow, setConfirmDeleteModalShow] = useState(false);
     const [confirmHistoricalDeleteModalShow, setConfirmHistoricalDeleteModalShow] = useState(false);
+    const [confirmRestoreModalShow, setConfirmRestoreModalShow] = useState(false);
     const [productDTO, setProductDTO] = useState({});
     const [productToDelete, setProductToDelete] = useState(null);
+    const [productToRestore, setProductToRestore] = useState(null);
     const [errorDiscount, setErrorDiscount] = useState('');
     const [errorPrice, setErrorPrice] = useState('');
     const [previewUrl, setPreviewUrl] = useState('');
     const [modalPreviewUrl, setModalPreviewUrl] = useState('');
     const [selectedFile, setSelectedFile] = useState(null);
     const [selectedModalFile, setSelectedModalFile] = useState(null);
-    const [selectedFileName, setSelectedFileName] = useState('');
-    const [selectedModalFileName, setSelectedModalFileName] = useState('');
     const fileInputRef = useRef(null);
     const modalFileInputRef = useRef(null);
     const startPage = Math.max(1, paginator.page - Math.floor(constants.MAX_VISIBLE_PAGES / 2));
@@ -56,7 +58,20 @@ const Services = () => {
         formState: { errors }
     } = useForm();
     const imageUrl = watch('imageUrl');
-    const imagePublicId = watch('imagePublicId');
+
+    const loadProducts = useCallback(async (pageToQuery = 1, filterToQuery = activeFilter) => {
+        const { data } = await getAllProducts({ page: pageToQuery, filter: filterToQuery });
+        const {
+            docs, hasNextPage, hasPrevPage, limit, nextPage,
+            page, pagingCounter, prevPage, totalDocs, totalPages
+        } = data;
+
+        setProducts(docs);
+        setPaginator({
+            hasNextPage, hasPrevPage, limit, nextPage, page,
+            pagingCounter, prevPage, totalDocs, totalPages
+        });
+    }, [activeFilter]);
 
     useEffect(() => {
 
@@ -84,22 +99,8 @@ const Services = () => {
             marginTop
         });
         if (!Object.keys(headers).length) return;
-        const getProducts = async () => {
-            const { data } = await getAllProducts({ page: 1 });
-            const {
-                docs, hasNextPage, hasPrevPage, limit, nextPage,
-                page, pagingCounter, prevPage, totalDocs, totalPages
-            } = data;
-
-            setProducts(docs);
-
-            setPaginator({
-                hasNextPage, hasPrevPage, limit, nextPage, page,
-                pagingCounter, prevPage, totalDocs, totalPages
-            });
-        }
-        getProducts();
-    }, [headers, getUserOptions, navigator, updateCategories]);
+        loadProducts(1, activeFilter);
+    }, [activeFilter, headers, getUserOptions, loadProducts, navigator, updateCategories]);
     const categories = getCategories() || []; // Si es undefined, usa un array vacío
     const onSubmit = async (form) => {
         if (!selectedFile && (!form.imageUrl || !form.imagePublicId)) {
@@ -148,12 +149,40 @@ const Services = () => {
         setConfirmDeleteModalShow(true);
     }
 
+    const handleRestoreClick = (row) => {
+        setProductToRestore(row);
+        setConfirmRestoreModalShow(true);
+    }
+
+    const executeRestore = async () => {
+        try {
+            if (!productToRestore) return;
+            setLoadingEdition(true);
+            const response = await restoreProduct({ _id: productToRestore._id, headers });
+            const shouldGoToPrevPage = activeFilter === 'deleted' && products.length === 1 && (paginator.page || 1) > 1;
+            const targetPage = shouldGoToPrevPage ? paginator.page - 1 : (paginator.page || 1);
+            await loadProducts(targetPage, activeFilter);
+            setMessagesToModal({ title: constants.MODAL_TITLE_SUCCCESS, body: constants.PRODUCT_RESTORED });
+            setAlertModalShow(response.alertModalShow);
+            setConfirmRestoreModalShow(false);
+            setProductToRestore(null);
+            setLoadingEdition(false);
+        } catch (error) {
+            const myBody = error?.response?.data?.message || error?.response?.data || constants.MODAL_BODY_ERROR;
+            setMessagesToModal({ title: constants.MODAL_TITLE_ERROR, body: myBody });
+            setAlertModalShow(true);
+            setConfirmRestoreModalShow(false);
+            setProductToRestore(null);
+            setLoadingEdition(false);
+        }
+    }
+
     const executeDelete = async (confirmHistorical = false) => {
         try {
             if (!productToDelete) return;
             setLoadingEdition(true);
             const response = await deleteProduct({ _id: productToDelete._id, headers, confirmHistorical });
-            setProducts(products.filter((product) => product._id !== productToDelete._id));
+            await loadProducts(paginator.page || 1, activeFilter);
             setMessagesToModal({ title: constants.MODAL_TITLE_SUCCCESS, body: constants.PRODUCT_DELETED });
             setAlertModalShow(response.alertModalShow);
             setConfirmDeleteModalShow(false);
@@ -194,15 +223,11 @@ const Services = () => {
                     imagePublicId: responseUpload.data.publicId
                 };
                 setSelectedModalFile(null);
-                setSelectedModalFileName('');
                 if (modalFileInputRef.current) modalFileInputRef.current.value = '';
             }
 
             const response = await updateProduct(payload, headers);
-            const updatedData = products.map((product) =>
-                product._id === response.data._id ? response.data : product
-            );
-            setProducts(updatedData);
+            await loadProducts(paginator.page || 1, activeFilter);
             setMessagesToModal({ title: constants.MODAL_TITLE_SUCCCESS, body: constants.PRODUCT_UPDATED });
             setAlertModalShow(response.alertModalShow);
             setLoadingEdition(response.loadingReq);
@@ -226,18 +251,7 @@ const Services = () => {
             [pageToQuery]: true
         }));
 
-        const { data } = await getAllProducts({ page: pageToQuery });
-        const {
-            docs, hasNextPage, hasPrevPage, limit, nextPage,
-            page, pagingCounter, prevPage, totalDocs, totalPages
-        } = data;
-
-        setProducts(docs);
-
-        setPaginator({
-            hasNextPage, hasPrevPage, limit, nextPage, page,
-            pagingCounter, prevPage, totalDocs, totalPages
-        });
+        await loadProducts(pageToQuery, activeFilter);
         setLoadingPage(prevState => ({
             ...prevState,
             [pageToQuery]: false
@@ -249,7 +263,6 @@ const Services = () => {
         setPreviewUrl('');
         setValue('imageUrl', '');
         setValue('imagePublicId', '');
-        setSelectedFileName('');
         if (fileInputRef.current) fileInputRef.current.value = '';
     }
 
@@ -267,7 +280,6 @@ const Services = () => {
                     imagePublicId: responseUpload.data.publicId
                 };
                 setSelectedFile(null);
-                setSelectedFileName('');
                 if (fileInputRef.current) fileInputRef.current.value = '';
             }
 
@@ -282,12 +294,7 @@ const Services = () => {
             const response = await createProduct(payload, headers);
             setLoadingServices(response.loadingReq);
 
-            const newProduct = {
-                ...response.data,
-                category_id: payload.category_id
-            };
-
-            setProducts([newProduct, ...products]);
+            await loadProducts(1, activeFilter);
 
             setMessagesToModal({ title: constants.MODAL_TITLE_SUCCCESS, body: constants.PRODUCT_CREATED });
             setAlertModalShow(response.alertModalShow);
@@ -394,7 +401,6 @@ const Services = () => {
                                     const file = e.target.files?.[0] || null;
                                     setSelectedFile(file);
                                     setPreviewUrl(file ? URL.createObjectURL(file) : '');
-                                    setSelectedFileName(name);
                                     if (name) clearErrors('imageUrl');
                                 }}
                             />
@@ -455,12 +461,24 @@ const Services = () => {
                     }
                 }
             >
+                <FilterChips
+                    options={[
+                        { id: 'all', label: 'Todos' },
+                        { id: 'available', label: 'Disponibles' },
+                        { id: 'exhausted', label: 'Agotados' },
+                        { id: 'deleted', label: 'Eliminados' }
+                    ]}
+                    activeValue={activeFilter}
+                    onChange={setActiveFilter}
+                    className="mb-3"
+                />
                 <Table bordered hover className="tableResponsive">
                     <thead>
                         <tr>
                             <th>Categoria</th>
                             <th>Nombre</th>
                             <th>Imagen</th>
+                            <th>Unidades disponibles</th>
                             <th>Precio</th>
                             <th>Descuento</th>
                             <th>Estado de la categoria</th>
@@ -480,16 +498,23 @@ const Services = () => {
                                             : <span className="text-muted">-</span>
                                         }
                                     </td>
+                                    <td className="text-center">{`${product.inventoryRealCount ?? 0} ${product.inventoryRealUnit ?? ''}`.trim()}</td>
                                     <td>{product.price}</td>
                                     <td>{product.discount}%</td>
                                     <td>{constants.CATEGORY_STATUSES[category?.status]}</td>
                                     <td>
-                                        <div className="d-flex gap-2">
-                                            <Button variant="warning" onClick={() => handleEditClick(product)}>Editar</Button>
-                                            <Button variant="danger" disabled={loadingEdition} onClick={() => handleDeleteClick(product)}>
-                                                Eliminar
+                                        {product.lifecycleStatus === 'deleted' ? (
+                                            <Button variant="success" disabled={loadingEdition} onClick={() => handleRestoreClick(product)}>
+                                                Restaurar
                                             </Button>
-                                        </div>
+                                        ) : (
+                                            <div className="d-flex gap-2">
+                                                <Button variant="warning" onClick={() => handleEditClick(product)}>Editar</Button>
+                                                <Button variant="danger" disabled={loadingEdition} onClick={() => handleDeleteClick(product)}>
+                                                    Eliminar
+                                                </Button>
+                                            </div>
+                                        )}
                                     </td>
                                 </tr>
                             );
@@ -605,11 +630,9 @@ const Services = () => {
                                             ref={modalFileInputRef}
                                     accept="image/png, image/jpeg, image/webp"
                                     onChange={(e) => {
-                                        const name = e.target.files?.[0]?.name || '';
-                                        const file = e.target.files?.[0] || null;
-                                        setSelectedModalFile(file);
-                                        setModalPreviewUrl(file ? URL.createObjectURL(file) : currentRow.imageUrl);
-                                        setSelectedModalFileName(name);
+                                    const file = e.target.files?.[0] || null;
+                                    setSelectedModalFile(file);
+                                    setModalPreviewUrl(file ? URL.createObjectURL(file) : currentRow.imageUrl);
                                     }}
                                 />
                                     <small className="text-muted ms-1">Selecciona un archivo para previsualizar. Se subirá al guardar.</small>
@@ -682,6 +705,19 @@ const Services = () => {
                 size='md'
                 closeButton={0}
                 onConfirm={() => executeDelete(true)}
+                loadingReq={loadingEdition}
+            />
+            <ConfirmModal
+                show={confirmRestoreModalShow}
+                onHide={() => {
+                    setConfirmRestoreModalShow(false);
+                    setProductToRestore(null);
+                }}
+                title={constants.MODAL_TITLE_RESTORE_PRODUCT}
+                bodyText={constants.MODAL_BODY_RESTORE_PRODUCT}
+                size='md'
+                closeButton={0}
+                onConfirm={executeRestore}
                 loadingReq={loadingEdition}
             />
             <AlertModal

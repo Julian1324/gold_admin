@@ -1,0 +1,27 @@
+.filterChipsWrapper {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.chipFilter {
+    border: 1px solid #d0d7e2;
+    border-radius: 999px;
+    background-color: #fff;
+    color: #344054;
+    padding: 0.45rem 0.9rem;
+    font-size: 0.9rem;
+    line-height: 1;
+    transition: all 0.2s ease;
+}
+
+.chipFilter:hover {
+    border-color: #0d6efd;
+    color: #0d6efd;
+}
+
+.chipFilter.active {
+    background-color: #0d6efd;
+    border-color: #0d6efd;
+    color: #fff;
+}

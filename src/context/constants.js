@@ -10,6 +10,7 @@ const CREATE_PRODUCT = '/product';
 const PRODUCT_CREATED = '\u00A1Servicio creado exitosamente!';
 const PRODUCT_UPDATED = '\u00A1Servicio actualizado exitosamente!';
 const PRODUCT_DELETED = '\u00A1Servicio eliminado exitosamente!';
+const PRODUCT_RESTORED = '\u00A1Servicio restaurado exitosamente!';
 const PRODUCT_HAS_ACTIVE_ACCOUNTS = 'No se puede eliminar el servicio porque tiene cuentas activas.';
 const PRODUCT_HAS_MOVEMENTS = 'El servicio tiene movimientos históricos.';
 const GET_ALL_PRODUCTS = '/products';
@@ -67,6 +68,9 @@ const MODAL_TITLE_DELETE_PRODUCT = "Eliminar servicio";
 const MODAL_BODY_DELETE_PRODUCT = "¿Estás seguro de que deseas eliminar este servicio?";
 const MODAL_BODY_DELETE_PRODUCT_WITH_MOVEMENTS = "Este servicio tiene movimientos históricos. ¿Deseas eliminarlo de todas formas?";
 
+const MODAL_TITLE_RESTORE_PRODUCT = "Restaurar servicio";
+const MODAL_BODY_RESTORE_PRODUCT = "¿Estás seguro de que deseas restaurar este servicio?";
+
 export const constants = Object.freeze({
     API_URL,
     USER_SIGNIN,
@@ -80,6 +84,7 @@ export const constants = Object.freeze({
     PRODUCT_CREATED,
     PRODUCT_UPDATED,
     PRODUCT_DELETED,
+    PRODUCT_RESTORED,
     PRODUCT_HAS_ACTIVE_ACCOUNTS,
     PRODUCT_HAS_MOVEMENTS,
     GET_ALL_PRODUCTS,
@@ -131,5 +136,7 @@ export const constants = Object.freeze({
     CATEGORY_STATUSES,
     MODAL_TITLE_DELETE_PRODUCT,
     MODAL_BODY_DELETE_PRODUCT,
-    MODAL_BODY_DELETE_PRODUCT_WITH_MOVEMENTS
+    MODAL_BODY_DELETE_PRODUCT_WITH_MOVEMENTS,
+    MODAL_TITLE_RESTORE_PRODUCT,
+    MODAL_BODY_RESTORE_PRODUCT
 });

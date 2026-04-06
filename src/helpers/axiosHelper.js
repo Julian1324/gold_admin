@@ -182,10 +182,10 @@ export const createProduct = async (productDTO, headers) => {
     }
 }
 
-export const getAllProducts = async ({ page }) => {
+export const getAllProducts = async ({ page, filter = 'all' }) => {
     try {
         const response = await axiosInstance.get(
-            `${constants.API_URL + constants.GET_ALL_PRODUCTS}?${constants.PARAMS_PAGE + page}`,
+            `${constants.API_URL + constants.GET_ALL_PRODUCTS}?${constants.PARAMS_PAGE + page}&filter=${filter}`,
         )
         if (response.status === 200) return {
             data: response.data,
@@ -275,10 +275,10 @@ export const getProducts = async ({ headers }) => {
     }
 }
 
-export const getAccountsPage = async ({ headers, page }) => {
+export const getAccountsPage = async ({ headers, page, filter = 'all' }) => {
     try {
         const response = await axiosInstance.get(
-            `${constants.API_URL + constants.GET_ACCOUNTS}?${constants.PARAMS_PAGE + page}`,
+            `${constants.API_URL + constants.GET_ACCOUNTS}?${constants.PARAMS_PAGE + page}&filter=${filter}`,
             { headers }
         )
         if (response.status === 200) return {
@@ -326,6 +326,24 @@ export const deleteProduct = async ({ _id, headers, confirmHistorical = false })
     try {
         const response = await axiosInstance.delete(
             `${constants.API_URL + constants.CREATE_PRODUCT}/${_id}?confirmHistorical=${confirmHistorical}`,
+            { headers }
+        );
+
+        if (response.status === 200) return {
+            data: response.data,
+            loadingReq: false,
+            alertModalShow: true
+        };
+    } catch (error) {
+        throw error;
+    }
+}
+
+export const restoreProduct = async ({ _id, headers }) => {
+    try {
+        const response = await axiosInstance.put(
+            `${constants.API_URL + constants.CREATE_PRODUCT}/restore/${_id}`,
+            {},
             { headers }
         );
 

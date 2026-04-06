@@ -10,6 +10,7 @@ import { AlertModal } from "../../shared/Modal/AlertModal";
 import { useNavigate } from 'react-router-dom';
 import { Table, Button, Modal, Form } from 'react-bootstrap';
 import { timeFormatter } from "../../helpers/timeZoneHelper";
+import FilterChips from "../../shared/FilterChips/FilterChips";
 import './Accounts.css';
 
 const Accounts = () => {
@@ -29,6 +30,7 @@ const Accounts = () => {
     const [showEditModal, setShowEditModal] = useState(false);
     const [currentRow, setCurrentRow] = useState(null);
     const [loadingEdition, setLoadingEdition] = useState(false);
+    const [activeFilter, setActiveFilter] = useState('all');
     const startPage = Math.max(1, paginator.page - Math.floor(constants.MAX_VISIBLE_PAGES / 2));
     const endPage = Math.min(paginator.totalPages, startPage + constants.MAX_VISIBLE_PAGES - 1);
     const pages = Array.from({ length: endPage - startPage + 1 }, (_, i) => startPage + i);
@@ -40,6 +42,13 @@ const Accounts = () => {
         control,
         formState: { errors }
     } = useForm();
+
+    const loadAccounts = async (pageToQuery = 1, filterToQuery = activeFilter) => {
+        const response = await getAccountsPage({ headers, page: pageToQuery, filter: filterToQuery });
+        setAccounts(response.data.docs);
+        delete response.data.docs;
+        setPaginator(response.data);
+    };
 
     useEffect(() => {
         const uOptions = getUserOptions();
@@ -68,10 +77,7 @@ const Accounts = () => {
 
         const getTheAccounts = async () => {
             try {
-                const response = await getAccountsPage({ headers, page: 1 });
-                setAccounts(response.data.docs);
-                delete response.data.docs;
-                setPaginator(response.data);
+                await loadAccounts(1, activeFilter);
             } catch (error) {
                 console.log('error:', error);
                 const myBody = error?.response?.data.includes('jwt') ? constants.USER_SESSION_EXPIRED : error?.response?.data;
@@ -81,7 +87,7 @@ const Accounts = () => {
         }
         getTheAccounts();
         getTheProducts();
-    }, [headers, getUserOptions, navigator]);
+    }, [headers, getUserOptions, navigator, activeFilter]);
 
     const onSubmit = async (form) => {
         let incompleteProfiles = [];
@@ -115,12 +121,12 @@ const Accounts = () => {
         try {
             setLoadingAccount(true);
             const response = await createAccount({ headers, accountDTO });
-            setAccounts([response.data, ...accounts]);
             setLoadingAccount(response.loadingReq);
             setProfiles({ 1: { name: '', pin: '', status: true } });
             setConfirmModalShow(false);
             setMessagesToModal({ title: constants.MODAL_TITLE_SUCCCESS, body: constants.ACCOUNT_CREATED });
             setAlertModalShow(true);
+            await loadAccounts(1, activeFilter);
             reset();
         } catch (error) {
             console.log('error:', error);
@@ -162,18 +168,7 @@ const Accounts = () => {
             [pageToQuery]: true
         }));
 
-        const { data } = await getAccountsPage({ headers, page: pageToQuery });
-        const {
-            docs, hasNextPage, hasPrevPage, limit, nextPage,
-            page, pagingCounter, prevPage, totalDocs, totalPages
-        } = data;
-
-        setAccounts(docs);
-
-        setPaginator({
-            hasNextPage, hasPrevPage, limit, nextPage, page,
-            pagingCounter, prevPage, totalDocs, totalPages
-        });
+        await loadAccounts(pageToQuery, activeFilter);
         setLoadingPage(prevState => ({
             ...prevState,
             [pageToQuery]: false
@@ -214,6 +209,21 @@ const Accounts = () => {
         value: key === "true",
         label: value,
     }));
+
+    const getActiveProfilesSummary = (account) => {
+        const profiles = Array.isArray(account?.profiles) ? account.profiles : [];
+        const totalProfiles = profiles.length;
+        const activeProfiles = profiles.filter((profile) => profile?.status === true).length;
+        const loadedLabel = totalProfiles === 1 ? 'cargado' : 'cargados';
+        return `${activeProfiles} disponibles / ${totalProfiles} ${loadedLabel}`;
+    };
+
+    const filterChips = [
+        { id: 'all', label: 'Todos' },
+        { id: 'available', label: 'Disponibles' },
+        { id: 'unavailable', label: 'Sin disponibles' },
+        { id: 'inactive', label: 'Inactivas' }
+    ];
 
     return (
         <>
@@ -358,11 +368,18 @@ const Accounts = () => {
                     }
                 }
             >
+                <FilterChips
+                    options={filterChips}
+                    activeValue={activeFilter}
+                    onChange={setActiveFilter}
+                    className="mb-3"
+                />
                 <Table bordered hover className="tableResponsive">
                     <thead>
                         <tr>
                             <th>Fecha</th>
                             <th>Tipo</th>
+                            <th>Perfiles activos</th>
                             <th>Email</th>
                             <th>Contraseña</th>
                             <th>Disponibilidad</th>
@@ -374,6 +391,7 @@ const Accounts = () => {
                             <tr key={accIndex}>
                                 <td>{timeFormatter(account.createdAt)}</td>
                                 <td>{products.find((product) => product._id === account.productID)?.name}</td>
+                                <td className="text-center">{getActiveProfilesSummary(account)}</td>
                                 <td>{account.email}</td>
                                 <td>{account.password}</td>
                                 <td>{constants.ACCOUNT_STATUS[account.status]}</td>
