@@ -275,10 +275,19 @@ export const getProducts = async ({ headers }) => {
     }
 }
 
-export const getAccountsPage = async ({ headers, page, filter = 'all' }) => {
+export const getAccountsPage = async ({ headers, page, filter = 'all', filters = {} }) => {
     try {
+        const params = new URLSearchParams({
+            [constants.PARAMS_PAGE.replace('=', '')]: page,
+            filter
+        });
+
+        Object.entries(filters).forEach(([key, value]) => {
+            if (value !== undefined && value !== null && value !== '') params.append(key, value);
+        });
+
         const response = await axiosInstance.get(
-            `${constants.API_URL + constants.GET_ACCOUNTS}?${constants.PARAMS_PAGE + page}&filter=${filter}`,
+            `${constants.API_URL + constants.GET_ACCOUNTS}?${params.toString()}`,
             { headers }
         )
         if (response.status === 200) return {

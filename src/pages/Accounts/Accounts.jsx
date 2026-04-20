@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { getUserSlice } from '../../context/store/store';
 import { useForm, Controller } from 'react-hook-form';
 import { createAccount, getAccountsPage, getProducts, updateAccount } from "../../helpers/axiosHelper";
@@ -11,6 +11,7 @@ import { useNavigate } from 'react-router-dom';
 import { Table, Button, Modal, Form } from 'react-bootstrap';
 import { timeFormatter } from "../../helpers/timeZoneHelper";
 import FilterChips from "../../shared/FilterChips/FilterChips";
+import AdvancedFilters from "../../shared/AdvancedFilters/AdvancedFilters";
 import './Accounts.css';
 
 const Accounts = () => {
@@ -31,6 +32,20 @@ const Accounts = () => {
     const [currentRow, setCurrentRow] = useState(null);
     const [loadingEdition, setLoadingEdition] = useState(false);
     const [activeFilter, setActiveFilter] = useState('all');
+    const emptyAdvancedFilters = { dateFrom: '', dateTo: '', productID: '', email: '', status: '' };
+    const getCurrentMonthFilters = () => {
+        const today = new Date();
+        const formatDate = (date) => date.toISOString().split('T')[0];
+        return {
+            dateFrom: '',
+            dateTo: formatDate(today),
+            productID: '',
+            email: '',
+            status: ''
+        };
+    };
+    const [filterDraft, setFilterDraft] = useState(getCurrentMonthFilters);
+    const [appliedFilters, setAppliedFilters] = useState(emptyAdvancedFilters);
     const startPage = Math.max(1, paginator.page - Math.floor(constants.MAX_VISIBLE_PAGES / 2));
     const endPage = Math.min(paginator.totalPages, startPage + constants.MAX_VISIBLE_PAGES - 1);
     const pages = Array.from({ length: endPage - startPage + 1 }, (_, i) => startPage + i);
@@ -43,12 +58,12 @@ const Accounts = () => {
         formState: { errors }
     } = useForm();
 
-    const loadAccounts = async (pageToQuery = 1, filterToQuery = activeFilter) => {
-        const response = await getAccountsPage({ headers, page: pageToQuery, filter: filterToQuery });
+    const loadAccounts = useCallback(async (pageToQuery = 1, filterToQuery = activeFilter, filtersToApply = appliedFilters) => {
+        const response = await getAccountsPage({ headers, page: pageToQuery, filter: filterToQuery, filters: filtersToApply });
         setAccounts(response.data.docs);
         delete response.data.docs;
         setPaginator(response.data);
-    };
+    }, [activeFilter, appliedFilters, headers]);
 
     useEffect(() => {
         const uOptions = getUserOptions();
@@ -77,7 +92,7 @@ const Accounts = () => {
 
         const getTheAccounts = async () => {
             try {
-                await loadAccounts(1, activeFilter);
+                await loadAccounts(1, activeFilter, appliedFilters);
             } catch (error) {
                 console.log('error:', error);
                 const myBody = error?.response?.data.includes('jwt') ? constants.USER_SESSION_EXPIRED : error?.response?.data;
@@ -87,7 +102,7 @@ const Accounts = () => {
         }
         getTheAccounts();
         getTheProducts();
-    }, [headers, getUserOptions, navigator, activeFilter]);
+    }, [headers, getUserOptions, navigator, activeFilter, appliedFilters, loadAccounts]);
 
     const onSubmit = async (form) => {
         let incompleteProfiles = [];
@@ -126,7 +141,7 @@ const Accounts = () => {
             setConfirmModalShow(false);
             setMessagesToModal({ title: constants.MODAL_TITLE_SUCCCESS, body: constants.ACCOUNT_CREATED });
             setAlertModalShow(true);
-            await loadAccounts(1, activeFilter);
+            await loadAccounts(1, activeFilter, appliedFilters);
             reset();
         } catch (error) {
             console.log('error:', error);
@@ -168,7 +183,7 @@ const Accounts = () => {
             [pageToQuery]: true
         }));
 
-        await loadAccounts(pageToQuery, activeFilter);
+        await loadAccounts(pageToQuery, activeFilter, appliedFilters);
         setLoadingPage(prevState => ({
             ...prevState,
             [pageToQuery]: false
@@ -210,19 +225,60 @@ const Accounts = () => {
         label: value,
     }));
 
-    const getActiveProfilesSummary = (account) => {
+    const getAvailableProfiles = (account) => {
         const profiles = Array.isArray(account?.profiles) ? account.profiles : [];
-        const totalProfiles = profiles.length;
-        const activeProfiles = profiles.filter((profile) => profile?.status === true).length;
-        const loadedLabel = totalProfiles === 1 ? 'cargado' : 'cargados';
-        return `${activeProfiles} disponibles / ${totalProfiles} ${loadedLabel}`;
+        return profiles.filter((profile) => profile?.status === true).length;
+    };
+
+    const getLoadedProfiles = (account) => {
+        const profiles = Array.isArray(account?.profiles) ? account.profiles : [];
+        return profiles.length;
+    };
+
+    const handleApplyFilters = async (event) => {
+        event.preventDefault();
+        const nextFilters = { ...filterDraft };
+        setAppliedFilters(nextFilters);
+        await loadAccounts(1, activeFilter, nextFilters);
+    };
+
+    const handleClearFilters = async () => {
+        const defaultFilters = getCurrentMonthFilters();
+        setFilterDraft(defaultFilters);
+        setAppliedFilters(emptyAdvancedFilters);
+        setActiveFilter('all');
+        await loadAccounts(1, 'all', emptyAdvancedFilters);
     };
 
     const filterChips = [
         { id: 'all', label: 'Todos' },
-        { id: 'available', label: 'Disponibles' },
-        { id: 'unavailable', label: 'Sin disponibles' },
-        { id: 'inactive', label: 'Inactivas' }
+        { id: 'with_profiles', label: 'Con perfiles' },
+        { id: 'without_profiles', label: 'Sin perfiles' }
+    ];
+
+    const advancedFilterFields = [
+        { name: 'dateFrom', label: 'Desde', type: 'date' },
+        { name: 'dateTo', label: 'Hasta', type: 'date' },
+        {
+            name: 'productID',
+            label: 'Servicio',
+            type: 'select',
+            options: [
+                { value: '', label: 'Todos' },
+                ...products.map((product) => ({ value: product._id, label: product.name }))
+            ]
+        },
+        { name: 'email', label: 'Email', type: 'text', placeholder: 'Buscar email...' },
+        {
+            name: 'status',
+            label: 'Estado',
+            type: 'select',
+            options: [
+                { value: '', label: 'Todas' },
+                { value: 'true', label: 'Activas' },
+                { value: 'false', label: 'Inactivas' }
+            ]
+        }
     ];
 
     return (
@@ -368,6 +424,13 @@ const Accounts = () => {
                     }
                 }
             >
+                <AdvancedFilters
+                    fields={advancedFilterFields}
+                    values={filterDraft}
+                    onChange={setFilterDraft}
+                    onSubmit={handleApplyFilters}
+                    onClear={handleClearFilters}
+                />
                 <FilterChips
                     options={filterChips}
                     activeValue={activeFilter}
@@ -378,8 +441,9 @@ const Accounts = () => {
                     <thead>
                         <tr>
                             <th>Fecha</th>
-                            <th>Tipo</th>
-                            <th>Perfiles activos</th>
+                            <th>Servicio</th>
+                            <th>Disponibles</th>
+                            <th>Cargados</th>
                             <th>Email</th>
                             <th>Contraseña</th>
                             <th>Disponibilidad</th>
@@ -391,7 +455,8 @@ const Accounts = () => {
                             <tr key={accIndex}>
                                 <td>{timeFormatter(account.createdAt)}</td>
                                 <td>{products.find((product) => product._id === account.productID)?.name}</td>
-                                <td className="text-center">{getActiveProfilesSummary(account)}</td>
+                                <td className="text-center">{getAvailableProfiles(account)}</td>
+                                <td className="text-center">{getLoadedProfiles(account)}</td>
                                 <td>{account.email}</td>
                                 <td>{account.password}</td>
                                 <td>{constants.ACCOUNT_STATUS[account.status]}</td>
