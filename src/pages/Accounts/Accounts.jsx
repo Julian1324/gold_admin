@@ -262,7 +262,8 @@ const Accounts = () => {
         {
             name: 'productID',
             label: 'Servicio',
-            type: 'select',
+            type: 'searchSelect',
+            placeholder: 'Buscar servicio...',
             options: [
                 { value: '', label: 'Todos' },
                 ...products.map((product) => ({ value: product._id, label: product.name }))

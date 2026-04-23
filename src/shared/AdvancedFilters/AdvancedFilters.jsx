@@ -1,3 +1,4 @@
+import Select from 'react-select';
 import './AdvancedFilters.css';
 
 const AdvancedFilters = ({ fields = [], values = {}, onChange, onSubmit, onClear }) => {
@@ -6,6 +7,22 @@ const AdvancedFilters = ({ fields = [], values = {}, onChange, onSubmit, onClear
     };
 
     const renderField = (field) => {
+        if (field.type === 'searchSelect') {
+            const selectedOption = (field.options || []).find((option) => option.value === (values[field.name] || '')) || null;
+
+            return (
+                <Select
+                    value={selectedOption}
+                    options={field.options || []}
+                    placeholder={field.placeholder || 'Buscar...'}
+                    isClearable={field.isClearable !== false}
+                    isSearchable
+                    menuPlacement={field.menuPlacement || 'auto'}
+                    onChange={(selectedOption) => handleFieldChange(field.name, selectedOption?.value || '')}
+                />
+            );
+        }
+
         if (field.type === 'select') {
             return (
                 <select
