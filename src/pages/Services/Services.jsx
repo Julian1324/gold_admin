@@ -12,6 +12,24 @@ import ConfirmModal from "../../../../gold_admin/src/shared/Modal/ConfirmModal";
 import { useRef } from "react";
 import FilterChips from "../../shared/FilterChips/FilterChips";
 
+const getServiceErrorMessage = (error) => {
+    const responseData = error?.response?.data;
+
+    if (typeof responseData === 'string') {
+        return responseData.includes('jwt') ? constants.USER_SESSION_EXPIRED : responseData;
+    }
+
+    if (responseData?.message) {
+        return responseData.message;
+    }
+
+    if (error?.message) {
+        return error.message;
+    }
+
+    return constants.MODAL_BODY_ERROR;
+};
+
 const Services = () => {
 
     const navigator = useNavigate();
@@ -235,7 +253,7 @@ const Services = () => {
 
         } catch (error) {
             console.log('error:', error);
-            const myBody = error?.response?.data.includes('jwt') ? constants.USER_SESSION_EXPIRED : error?.response?.data;
+            const myBody = getServiceErrorMessage(error);
             setMessagesToModal({ title: constants.MODAL_TITLE_ERROR, body: myBody });
             setAlertModalShow(true);
             setLoadingEdition(false);
@@ -303,7 +321,7 @@ const Services = () => {
             reset();
         } catch (error) {
             console.log('error:', error);
-            const myBody = error?.response?.data.includes('jwt') ? constants.USER_SESSION_EXPIRED : error?.response?.data;
+            const myBody = getServiceErrorMessage(error);
             setMessagesToModal({ title: constants.MODAL_TITLE_ERROR, body: myBody });
             setAlertModalShow(true);
             setLoadingEdition(false);

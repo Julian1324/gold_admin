@@ -24,7 +24,8 @@
   },
   "scripts": {
     "dev": "react-scripts start",
-    "build": "react-scripts build && rm -rf ../gold_production/frontend/admin/* && mv build/* ../gold_production/frontend/admin/",
+    "build": "react-scripts build",
+    "build:unix": "react-scripts build && rm -rf ../gold_production/frontend/admin/* && mv build/* ../gold_production/frontend/admin/",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },
